@@ -1,10 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Photography & Media Club</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="home.css" />
   </head>
+
   <body>
     <header>
       <h1>PhotoClub</h1>
@@ -18,41 +26,66 @@
       </nav>
     </header>
 
-    <section>
+    <section class="hero">
       <h2>Capturing Moments</h2>
       <p>We turn ordinary scenes into extraordinary stories</p>
-      <button>Explore Gallery</button>
+      <button class="btn">Explore Gallery</button>
     </section>
 
-    <section>
+    <section id="about" class="about">
       <h2>About Us</h2>
       <p>
-        Photography & Media Club is a creative space where passionate
-        individuals capture moments, tell stories, and explore visual creativity
-        through photography and filmmaking.
+        Photography & Media Club is a creative platform where passionate
+        individuals explore visual storytelling through photography,
+        videography, and media production.
       </p>
     </section>
 
-    <section>
+    <section id="gallery">
       <h2>Gallery</h2>
+      <div class="gallery"></div>
     </section>
 
-    <section>
+    <section id="events">
       <h2>Events</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Photo Walk</h3>
+          <p>Explore city life and capture street moments.</p>
+        </div>
+        <div class="card">
+          <h3>Editing Workshop</h3>
+          <p>Learn Lightroom & Photoshop basics.</p>
+        </div>
+      </div>
     </section>
 
-    <section>
+    <section id="members">
       <h2>Our Team</h2>
+      <div class="team">
+        <div class="member">
+          <h4>John Doe</h4>
+          <p>President</p>
+        </div>
+        <div class="member">
+          <h4>Jane Smith</h4>
+          <p>Creative Lead</p>
+        </div>
+      </div>
     </section>
 
-    <section>
+    <section id="contact">
       <h2>Contact Us</h2>
       <form>
-        <input type="text" placeholder="Your Name" />
-        <input type="email" placeholder="Your Email" />
-        <textarea placeholder="Your Message"></textarea>
-        <button>Send Message</button>
+        <input type="text" placeholder="Your Name" required />
+        <input type="email" placeholder="Your Email" required />
+        <textarea placeholder="Your Message" rows="4"></textarea>
+        <button class="btn">Send Message</button>
       </form>
     </section>
+
+    <footer>
+      <p>© 2026 Photography & Media Club | All Rights Reserved</p>
+    </footer>
   </body>
 </html>
