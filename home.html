@@ -29,7 +29,7 @@
     <section class="hero">
       <h2>Capturing Moments</h2>
       <p>We turn ordinary scenes into extraordinary stories</p>
-      <button class="btn">Explore Gallery</button>
+      <button class="btn" id="exploreBtn">Explore Gallery</button>
     </section>
 
     <section id="about" class="about">
@@ -43,12 +43,17 @@
 
     <section id="gallery">
       <h2>Gallery</h2>
-      <div class="gallery"></div>
+      <div class="gallery" id="galleryContainer">
+        <!-- Photos will load here -->
+      </div>
+      <div class="more-wrapper" id="moreWrapper" style="display:none;">
+        <button class="btn btn-more" onclick="openFullGallery()">View More Photos</button>
+      </div>
     </section>
 
     <section id="events">
       <h2>Events</h2>
-      <div class="cards">
+      <div class="cards" id="eventsContainer">
         <div class="card">
           <h3>Photo Walk</h3>
           <p>Explore city life and capture street moments.</p>
@@ -64,11 +69,11 @@
       <h2>Our Team</h2>
       <div class="team">
         <div class="member">
-          <h4>John Doe</h4>
+          <h4>Sanjida Afrin Shikha</h4>
           <p>President</p>
         </div>
         <div class="member">
-          <h4>Jane Smith</h4>
+          <h4>Sumaiya Afrin Eva</h4>
           <p>Creative Lead</p>
         </div>
       </div>
@@ -76,7 +81,7 @@
 
     <section id="contact">
       <h2>Contact Us</h2>
-      <form>
+      <form class="contact-form" id="contactForm">
         <input type="text" placeholder="Your Name" required />
         <input type="email" placeholder="Your Email" required />
         <textarea placeholder="Your Message" rows="4"></textarea>
@@ -84,8 +89,31 @@
       </form>
     </section>
 
+    <div id="fullGalleryPage" class="full-gallery-page" style="display:none;">
+      <button class="back-btn" onclick="backToMain()">&larr; Back</button>
+      <h2>All Photos</h2>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search photos..." />
+      </div>
+      <div class="gallery-full" id="galleryFull">
+      </div>
+    </div>
+
+    <div id="lightbox" class="lightbox" style="display:none;">
+      <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+      <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">&#10094;</button>
+      <div class="lightbox-container">
+        <img id="lightboxImage" src="" alt="Fullscreen Photo" />
+      </div>
+      <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">&#10095;</button>
+      <div class="lightbox-counter">
+        <span id="lightboxCounter">1 / 1</span>
+      </div>
+    </div>
+
     <footer>
       <p>© 2026 Photography & Media Club | All Rights Reserved</p>
     </footer>
+    <script src="home.js"></script>
   </body>
 </html>
