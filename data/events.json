@@ -1,0 +1,137 @@
+[
+    {
+        "id": "event_001",
+        "title": "Photo Walk",
+        "description": "Explore city life and capture street moments.",
+        "category": "Outdoor",
+        "status": "upcoming",
+        "date": "2026-05-15",
+        "time": "09:00 AM",
+        "end_time": "01:00 PM",
+        "location": "City Center Park",
+        "organizer": "Sanjida Afrin Shikha",
+        "organizer_bio": "Photography enthusiast with 5+ years of experience in street photography",
+        "organizer_image": "https:\/\/i.pravatar.cc\/150?img=1",
+        "price": 0,
+        "capacity": 20,
+        "registered_count": 5,
+        "image_url": "https:\/\/images.unsplash.com\/photo-1607604276583-eef5d076aa5f?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "required_equipment": [
+            "Camera (DSLR\/Mirrorless\/Smartphone)",
+            "Comfortable shoes",
+            "Water bottle"
+        ],
+        "agenda": [
+            {
+                "time": "09:00 AM",
+                "activity": "Meet & Greet at Park Entrance"
+            },
+            {
+                "time": "09:30 AM",
+                "activity": "Composition & Framing Techniques"
+            },
+            {
+                "time": "10:00 AM",
+                "activity": "Free Photography Session"
+            },
+            {
+                "time": "12:00 PM",
+                "activity": "Photo Review & Feedback"
+            },
+            {
+                "time": "01:00 PM",
+                "activity": "Wrap-up"
+            }
+        ],
+        "highlights": [],
+        "created_at": "2026-04-01"
+    },
+    {
+        "id": "event_002",
+        "title": "Editing Workshop",
+        "description": "Learn Lightroom & Photoshop basics.",
+        "category": "Workshop",
+        "status": "upcoming",
+        "date": "2026-05-22",
+        "time": "06:00 PM",
+        "end_time": "08:30 PM",
+        "location": "Computer Lab, KUET",
+        "organizer": "Sumaiya Afrin Eva",
+        "organizer_bio": "Professional photo editor with expertise in Lightroom and Photoshop",
+        "organizer_image": "https:\/\/i.pravatar.cc\/150?img=2",
+        "price": 0,
+        "capacity": 30,
+        "registered_count": 12,
+        "image_url": "https:\/\/images.unsplash.com\/photo-1667314074023-f02db5ab75fd?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "required_equipment": [
+            "Laptop with Adobe Lightroom\/Photoshop",
+            "Mouse"
+        ],
+        "agenda": [
+            {
+                "time": "06:00 PM",
+                "activity": "Introduction to Adobe Lightroom"
+            },
+            {
+                "time": "06:45 PM",
+                "activity": "Basic Editing Techniques"
+            },
+            {
+                "time": "07:30 PM",
+                "activity": "Photoshop Essentials"
+            },
+            {
+                "time": "08:15 PM",
+                "activity": "Q&A Session"
+            }
+        ],
+        "highlights": [],
+        "created_at": "2026-04-01"
+    },
+    {
+        "id": "event_003",
+        "title": "Photography Competition",
+        "description": "Showcase your talent and win prizes!",
+        "category": "Competition",
+        "status": "upcoming",
+        "date": "2026-06-05",
+        "time": "10:00 AM",
+        "end_time": "04:00 PM",
+        "location": "KUET Auditorium",
+        "organizer": "Sanjida Afrin Shikha",
+        "organizer_bio": "Photography enthusiast with 5+ years of experience in street photography",
+        "organizer_image": "https:\/\/i.pravatar.cc\/150?img=1",
+        "price": 5,
+        "capacity": 50,
+        "registered_count": 28,
+        "image_url": "https:\/\/images.unsplash.com\/photo-1611162617213-7d7a39e9b1d7?w=800&h=600&fit=crop",
+        "required_equipment": [
+            "Camera",
+            "Your beautiful photos"
+        ],
+        "agenda": [
+            {
+                "time": "10:00 AM",
+                "activity": "Registration & Setup"
+            },
+            {
+                "time": "10:30 AM",
+                "activity": "Competition Begins"
+            },
+            {
+                "time": "02:00 PM",
+                "activity": "Judging & Evaluation"
+            },
+            {
+                "time": "03:30 PM",
+                "activity": "Winner Announcement"
+            },
+            {
+                "time": "04:00 PM",
+                "activity": "Prize Distribution"
+            }
+        ],
+        "highlights": [],
+        "created_at": "2026-04-05"
+    }
+]

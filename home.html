@@ -52,17 +52,40 @@
     </section>
 
     <section id="events">
-      <h2>Events</h2>
-      <div class="cards" id="eventsContainer">
-        <div class="card">
-          <h3>Photo Walk</h3>
-          <p>Explore city life and capture street moments.</p>
+      <h2>Upcoming Events</h2>
+      
+      <!-- Filter & Search Bar -->
+      <div class="events-toolbar">
+        <div class="search-box">
+          <input type="text" id="eventSearchInput" placeholder="Search events..." />
         </div>
-        <div class="card">
-          <h3>Editing Workshop</h3>
-          <p>Learn Lightroom & Photoshop basics.</p>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="Workshop">Workshop</button>
+          <button class="filter-btn" data-filter="Outdoor">Outdoor</button>
+          <button class="filter-btn" data-filter="Competition">Competition</button>
         </div>
+        <button class="view-toggle-btn" id="viewToggleBtn" title="Toggle calendar view">📅</button>
       </div>
+
+      <!-- Calendar View (Hidden by default) -->
+      <div id="calendarView" class="calendar-view" style="display: none;">
+        <div class="calendar-header">
+          <button id="prevMonth">&lt;</button>
+          <h3 id="calendarMonthYear"></h3>
+          <button id="nextMonth">&gt;</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <!-- Events Cards View -->
+      <div class="cards" id="eventsContainer"></div>
+    </section>
+
+    <!-- Past Events Section -->
+    <section id="past-events">
+      <h2>Past Events Archive</h2>
+      <div class="cards" id="pastEventsContainer"></div>
     </section>
 
     <section id="members">
@@ -111,9 +134,211 @@
       </div>
     </div>
 
+    <!-- Event Detail Modal -->
+    <div id="eventDetailModal" class="modal" style="display: none;">
+      <div class="modal-content event-detail-modal">
+        <button class="modal-close" onclick="closeEventDetail()">&times;</button>
+        
+        <img id="eventBanner" src="" alt="Event Banner" class="event-banner" crossorigin="anonymous" />
+        
+        <div class="event-detail-body">
+          <div class="event-header">
+            <div>
+              <h2 id="eventTitle"></h2>
+              <div class="event-meta">
+                <span id="eventStatus" class="event-status"></span>
+                <span id="eventCategory" class="event-category"></span>
+                <span id="eventPrice" class="event-price"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Countdown Timer -->
+          <div id="countdownContainer" class="countdown-timer" style="display: none;">
+            <div class="countdown-label">Starts in</div>
+            <div class="countdown-content">
+              <div class="countdown-unit">
+                <span id="countdownDays">0</span>
+                <label>Days</label>
+              </div>
+              <div class="countdown-unit">
+                <span id="countdownHours">0</span>
+                <label>Hours</label>
+              </div>
+              <div class="countdown-unit">
+                <span id="countdownMinutes">0</span>
+                <label>Minutes</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Info Grid -->
+          <div class="event-info-grid">
+            <div class="info-item">
+              <label>📅 Date</label>
+              <p id="eventDate"></p>
+            </div>
+            <div class="info-item">
+              <label>🕐 Time</label>
+              <p id="eventTime"></p>
+            </div>
+            <div class="info-item">
+              <label>📍 Location</label>
+              <p id="eventLocation"></p>
+            </div>
+            <div class="info-item">
+              <label>💺 Capacity</label>
+              <p id="eventCapacity"></p>
+            </div>
+          </div>
+
+          <!-- Organizer Info -->
+          <div class="organizer-section">
+            <h3>Hosted By</h3>
+            <div class="organizer-card">
+              <img id="organizerImage" src="" alt="Organizer" class="organizer-image" crossorigin="anonymous" />
+              <div class="organizer-info">
+                <h4 id="organizerName"></h4>
+                <p id="organizerBio"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="event-section">
+            <h3>About This Event</h3>
+            <p id="eventDescription"></p>
+          </div>
+
+          <!-- Agenda -->
+          <div class="event-section">
+            <h3>📋 Agenda</h3>
+            <div id="agendaList" class="agenda-list"></div>
+          </div>
+
+          <!-- Required Equipment -->
+          <div class="event-section">
+            <h3>📦 Required Equipment</h3>
+            <ul id="equipmentList" class="equipment-list"></ul>
+          </div>
+
+          <!-- Registration Section -->
+          <div class="event-section">
+            <div class="registration-header">
+              <div>
+                <h3>Registration</h3>
+                <p id="seatsLeft" class="seats-info"></p>
+              </div>
+              <button class="btn btn-primary" id="registerBtn" onclick="openRegistrationForm()">Register Now</button>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="event-section">
+            <h3>💬 Discussion & Questions</h3>
+            
+            <div class="comment-form">
+              <input type="text" id="commentName" placeholder="Your Name" />
+              <textarea id="commentText" placeholder="Ask a question or leave a comment..."></textarea>
+              <button class="btn btn-small" onclick="submitComment()">Post Comment</button>
+            </div>
+
+            <div id="commentsList" class="comments-list"></div>
+          </div>
+
+          <!-- Reminder Section -->
+          <div class="event-section reminder-section">
+            <button class="btn btn-outline" id="reminderBtn" onclick="setReminder()">🔔 Remind Me</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registrationModal" class="modal" style="display: none;">
+      <div class="modal-content registration-modal">
+        <button class="modal-close" onclick="closeRegistrationForm()">&times;</button>
+        
+        <h2>Register for <span id="regEventTitle"></span></h2>
+        
+        <form id="eventRegistrationForm" onsubmit="submitRegistration(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" name="name" required />
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" name="email" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input type="tel" name="phone" required />
+            </div>
+            <div class="form-group">
+              <label>Address *</label>
+              <input type="text" name="address" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Institute/Organization *</label>
+              <input type="text" name="institute" required />
+            </div>
+            <div class="form-group">
+              <label>Academic Year *</label>
+              <select name="academic_year" required>
+                <option value="">Select Year</option>
+                <option value="1st">1st Year</option>
+                <option value="2nd">2nd Year</option>
+                <option value="3rd">3rd Year</option>
+                <option value="4th">4th Year</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Photography Experience *</label>
+            <select name="experience" required>
+              <option value="">Select Level</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Professional">Professional</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary full-width">Complete Registration</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal" style="display: none;">
+      <div class="modal-content confirmation-modal">
+        <div class="confirmation-icon">✓</div>
+        <h2>Registration Successful!</h2>
+        <p>Thank you for registering for <strong id="confirmEventName"></strong></p>
+        <p>You will receive a confirmation email shortly at <strong id="confirmEmail"></strong></p>
+        <div class="confirmation-details">
+          <h4>Event Details Sent To Your Email</h4>
+          <p>📍 <span id="confirmLocation"></span></p>
+          <p>📅 <span id="confirmDate"></span></p>
+          <p>🕐 <span id="confirmTime"></span></p>
+        </div>
+        <button class="btn btn-primary" onclick="closeConfirmation()">Done</button>
+      </div>
+    </div>
+
     <footer>
       <p>© 2026 Photography & Media Club | All Rights Reserved</p>
     </footer>
     <script src="home.js"></script>
+    <script src="home-events.js"></script>
   </body>
 </html>
