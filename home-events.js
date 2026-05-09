@@ -1,16 +1,19 @@
-// API Configuration
 const API_BASE = 'api/events.php';
 
-// Event Management System
 class EventManager {
+
   constructor() {
-    this.events = [];
-    this.currentEventId = null;
-    this.currentCalendarDate = new Date();
-    this.filteredEvents = [];
-    this.reminderEmail = '';
+    this.events = [];                  // Array of all events
+    this.currentEventId = null;        // ID of currently viewed event
+    this.currentCalendarDate = new Date(); // Current calendar navigation date
+    this.filteredEvents = [];          // Array of filtered events
+    this.reminderEmail = '';           // Email for remote reminders
   }
 
+  /**
+   * Load events from backend API
+   * Fetches all events and initializes the event list
+   */
   async loadEvents() {
     try {
       const response = await fetch(`${API_BASE}?action=get_events`);
@@ -435,6 +438,7 @@ async function submitRegistration(e) {
     phone: formData.get('phone'),
     address: formData.get('address'),
     institute: formData.get('institute'),
+    gender: formData.get('gender'),
     academic_year: formData.get('academic_year'),
     experience: formData.get('experience')
   };

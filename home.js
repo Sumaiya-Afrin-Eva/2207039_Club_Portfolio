@@ -1,7 +1,9 @@
+// Configuration settings
 const CONFIG = {
-  MAX_PHOTO_SIZE: 5 * 1024 * 1024, 
-  PHOTOS_PER_PAGE: 12, 
-  STORAGE_KEY: 'photoclub_photos',
+  MAX_PHOTO_SIZE: 5 * 1024 * 1024, // Max upload size (5MB)
+  PHOTOS_PER_PAGE: 12, // Photos shown on main gallery
+  STORAGE_KEY: 'photoclub_photos',// Key for localStorage
+  // Default images (shown if no saved data)
   DEFAULT_PHOTOS: [
     {
       id: 'default-0',
@@ -108,16 +110,17 @@ const CONFIG = {
   ]
 };
 
+// Class to handle photo storage
 class PhotoStorage {
   constructor() {
     this.photos = this.loadPhotos();
   }
-
+  // Load photos from localStorage
   loadPhotos() {
     const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
     if (stored) {
       try {
-        return JSON.parse(stored);
+        return JSON.parse(stored); // Convert JSON string to array
       } catch (e) {
         console.error('Failed to load photos from storage:', e);
         return CONFIG.DEFAULT_PHOTOS;
@@ -126,18 +129,19 @@ class PhotoStorage {
     return CONFIG.DEFAULT_PHOTOS;
   }
 
+  // Save photos to localStorage
   savePhotos() {
     localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(this.photos));
   }
-
+  // Get all photos
   getPhotos() {
     return this.photos;
   }
-
+  // Get limited number of photos
   getPhotosPaginated(limit) {
     return this.photos.slice(0, limit);
   }
-
+  // Search photos by alt text
   searchPhotos(query) {
     const lowerQuery = query.toLowerCase();
     return this.photos.filter(p => p.alt.toLowerCase().includes(lowerQuery));
@@ -146,60 +150,63 @@ class PhotoStorage {
 
 const photoStorage = new PhotoStorage();
 
-
+// Load main gallery (first page)
 function loadGallery() {
   const container = document.getElementById('galleryContainer');
   const moreWrapper = document.getElementById('moreWrapper');
   const allPhotos = photoStorage.getPhotos();
 
   const displayPhotos = allPhotos.slice(0, CONFIG.PHOTOS_PER_PAGE);
-
+  // Render images with click handlers for lightbox
   container.innerHTML = displayPhotos.map((photo, index) => `
     <img src="${photo.src}" alt="${photo.alt}" style="cursor: pointer;" onclick="setupLightboxAndOpen(${index}, true)" />
   `).join('');
 
+  // Show "More" button if extra photos exist
   if (allPhotos.length > CONFIG.PHOTOS_PER_PAGE) {
     moreWrapper.style.display = 'block';
   } else {
     moreWrapper.style.display = 'none';
   }
 }
-
+// Open full gallery page
 function openFullGallery() {
   const fullGalleryPage = document.getElementById('fullGalleryPage');
   fullGalleryPage.style.display = 'block';
   loadFullGallery();
 }
-
+// Load full gallery (with optional search)
 function loadFullGallery(searchQuery = '') {
   const container = document.getElementById('galleryFull');
   let photos = photoStorage.getPhotos();
-
+  // Apply search filter
   if (searchQuery) {
     photos = photoStorage.searchPhotos(searchQuery);
   }
-
+  // If no results found
   if (photos.length === 0) {
     container.innerHTML = '<div class="no-photos-message">No photos found.</div>';
     return;
   }
-
+  // Render all images
   container.innerHTML = photos.map((photo, index) => `
     <img src="${photo.src}" alt="${photo.alt}" style="cursor: pointer;" onclick="setupLightboxAndOpen(${index}, false)" />
   `).join('');
 }
-
+// Go back to main page
 function backToMain() {
   const fullGalleryPage = document.getElementById('fullGalleryPage');
   fullGalleryPage.style.display = 'none';
 }
-
+// Prepare photos and open lightbox
 function setupLightboxAndOpen(index, isMainGallery) {
   const allPhotos = photoStorage.getPhotos();
 
   if (isMainGallery) {
+    // Only first page photos
     currentLightboxPhotos = allPhotos.slice(0, CONFIG.PHOTOS_PER_PAGE);
   } else {
+    // Use search results if available
     const searchInput = document.getElementById('searchInput');
     if (searchInput && searchInput.value) {
       currentLightboxPhotos = photoStorage.searchPhotos(searchInput.value);
@@ -210,7 +217,7 @@ function setupLightboxAndOpen(index, isMainGallery) {
 
   openLightbox(index);
 }
-
+// Setup live search
 function setupSearchFunctionality() {
   const searchInput = document.getElementById('searchInput');
   if (searchInput) {
@@ -219,7 +226,7 @@ function setupSearchFunctionality() {
     });
   }
 }
-
+// Scroll to gallery section
 function setupExploreButton() {
   const exploreBtn = document.getElementById('exploreBtn');
   if (exploreBtn) {
@@ -234,7 +241,7 @@ function setupExploreButton() {
     });
   }
 }
-
+// Handle contact form submission
 function setupContactForm() {
   const form = document.getElementById('contactForm');
   if (form) {
@@ -247,6 +254,7 @@ function setupContactForm() {
       const message = inputs[2].value;
 
       try {
+        // Send data to fake API
         const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -266,10 +274,10 @@ function setupContactForm() {
     });
   }
 }
-
+// Lightbox state
 let currentLightboxPhotos = [];
 let currentLightboxIndex = 0;
-
+// Open lightbox
 function openLightbox(photoIndex) {
   currentLightboxIndex = photoIndex;
   const lightbox = document.getElementById('lightbox');
@@ -280,15 +288,16 @@ function openLightbox(photoIndex) {
   lightboxCounter.textContent = `${currentLightboxIndex + 1} / ${currentLightboxPhotos.length}`;
 
   lightbox.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden'; // disable scroll
 }
-
+// Close lightbox
 function closeLightbox() {
   const lightbox = document.getElementById('lightbox');
   lightbox.style.display = 'none';
   document.body.style.overflow = 'auto';
 }
 
+// Navigate next/previous image
 function navigateLightbox(direction) {
   currentLightboxIndex += direction;
 
@@ -304,7 +313,7 @@ function navigateLightbox(direction) {
   lightboxImage.src = currentLightboxPhotos[currentLightboxIndex].src;
   lightboxCounter.textContent = `${currentLightboxIndex + 1} / ${currentLightboxPhotos.length}`;
 }
-
+// Keyboard controls
 document.addEventListener('keydown', (e) => {
   const lightbox = document.getElementById('lightbox');
   const adminPanel = document.getElementById('adminPanel');
@@ -328,7 +337,7 @@ document.addEventListener('keydown', (e) => {
     }
   }
 });
-
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
   loadGallery();
   setupExploreButton();
