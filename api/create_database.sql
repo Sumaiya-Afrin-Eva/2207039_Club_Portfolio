@@ -6,7 +6,6 @@
 -- Create the database if it doesn't exist
 CREATE DATABASE IF NOT EXISTS `club_portfolio`;
 USE `club_portfolio`;
-DROP TABLE IF EXISTS `users`;
 -- ====================================================
 -- 1. USERS TABLE - Store admin and member information
 -- ====================================================
