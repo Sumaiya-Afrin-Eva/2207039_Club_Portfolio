@@ -446,12 +446,15 @@
 
     <!-- Event Modal -->
     <div id="eventModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h2>Create/Edit Event</h2>
                 <button class="modal-close" onclick="closeEventModal()">×</button>
             </div>
-            <form id="eventForm" onsubmit="saveEvent(event)">
+            <form id="eventForm" onsubmit="saveEvent(event)" style="max-height: 80vh; overflow-y: auto;">
+                <!-- Basic Information -->
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Basic Information</h3>
+                
                 <div class="form-group">
                     <label>Title *</label>
                     <input type="text" id="eventTitle" required>
@@ -462,8 +465,20 @@
                 </div>
                 <div class="form-group">
                     <label>Category</label>
-                    <input type="text" id="eventCategory" placeholder="e.g., Outdoor, Workshop">
+                    <input type="text" id="eventCategory" placeholder="e.g., Outdoor, Workshop, Competition">
                 </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="eventStatus">
+                        <option value="upcoming">Upcoming</option>
+                        <option value="ongoing">Ongoing</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+
+                <!-- Date & Time -->
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Date & Time</h3>
+                
                 <div class="form-group">
                     <label>Event Date *</label>
                     <input type="date" id="eventDate" required>
@@ -476,19 +491,73 @@
                     <label>End Time</label>
                     <input type="time" id="eventEndTime">
                 </div>
+
+                <!-- Location & Details -->
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Location & Details</h3>
+                
                 <div class="form-group">
                     <label>Location *</label>
                     <input type="text" id="eventLocation" required>
                 </div>
                 <div class="form-group">
-                    <label>Price</label>
-                    <input type="number" id="eventPrice" min="0" step="0.01" value="0">
-                </div>
-                <div class="form-group">
                     <label>Capacity *</label>
                     <input type="number" id="eventCapacity" min="1" required>
                 </div>
-                <div style="display: flex; gap: 10px;">
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" id="eventPrice" min="0" step="0.01" value="0">
+                </div>
+
+                <!-- Images -->
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Images</h3>
+                
+                <div class="form-group">
+                    <label>Event Image URL</label>
+                    <input type="text" id="eventImageUrl" placeholder="Leave empty for demo image">
+                    <small style="color: #999;">Demo images will be used if left blank</small>
+                </div>
+                <div class="form-group">
+                    <label>Organizer Image URL</label>
+                    <input type="text" id="organizerImageUrl" placeholder="Leave empty for demo image">
+                    <small style="color: #999;">Demo images will be used if left blank</small>
+                </div>
+
+                <!-- Organizer Info -->
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Organizer Information</h3>
+                
+                <div class="form-group">
+                    <label>Organizer Bio</label>
+                    <textarea id="organizerBio" placeholder="Brief bio of the organizer"></textarea>
+                </div>
+
+                <!-- Agenda -->
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Event Agenda</h3>
+                
+                <div id="agendaContainer">
+                    <div class="agenda-item-form" style="background: #f9fafb; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 10px; align-items: end;">
+                            <input type="time" class="agenda-time" placeholder="Time" required>
+                            <input type="text" class="agenda-activity" placeholder="Activity" required>
+                            <button type="button" class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addAgendaItem()" style="margin-bottom: 15px;">+ Add Agenda Item</button>
+
+                <!-- Equipment -->
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Required Equipment</h3>
+                
+                <div id="equipmentContainer">
+                    <div class="equipment-item-form" style="background: #f9fafb; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+                            <input type="text" class="equipment-name" placeholder="Equipment name" required>
+                            <button type="button" class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addEquipmentItem()" style="margin-bottom: 15px;">+ Add Equipment</button>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="btn btn-primary">Save Event</button>
                     <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
                 </div>
@@ -650,19 +719,101 @@
             document.getElementById('eventModal').classList.remove('active');
         }
 
+        // Demo images for events and organizers
+        const DEMO_EVENT_IMAGES = [
+            'https://images.unsplash.com/photo-1606608488545-d342b7a9e5a2?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1611153273679-1382cdf1d21b?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1540039155733-0ac63d0fb0e9?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop'
+        ];
+
+        const DEMO_ORGANIZER_IMAGES = [
+            'https://i.pravatar.cc/150?img=1',
+            'https://i.pravatar.cc/150?img=2',
+            'https://i.pravatar.cc/150?img=3',
+            'https://i.pravatar.cc/150?img=4',
+            'https://i.pravatar.cc/150?img=5'
+        ];
+
+        function getRandomDemoImage(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function collectAgendaItems() {
+            const items = [];
+            document.querySelectorAll('.agenda-item-form').forEach(form => {
+                const time = form.querySelector('.agenda-time').value;
+                const activity = form.querySelector('.agenda-activity').value;
+                if (time && activity) {
+                    items.push({ time, activity });
+                }
+            });
+            return items;
+        }
+
+        function collectEquipmentItems() {
+            const items = [];
+            document.querySelectorAll('.equipment-item-form').forEach(form => {
+                const name = form.querySelector('.equipment-name').value;
+                if (name) {
+                    items.push(name);
+                }
+            });
+            return items;
+        }
+
+        function addAgendaItem() {
+            const container = document.getElementById('agendaContainer');
+            const div = document.createElement('div');
+            div.className = 'agenda-item-form';
+            div.style.cssText = 'background: #f9fafb; padding: 10px; border-radius: 5px; margin-bottom: 10px;';
+            div.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 10px; align-items: end;">
+                    <input type="time" class="agenda-time" placeholder="Time" required>
+                    <input type="text" class="agenda-activity" placeholder="Activity" required>
+                    <button type="button" class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addEquipmentItem() {
+            const container = document.getElementById('equipmentContainer');
+            const div = document.createElement('div');
+            div.className = 'equipment-item-form';
+            div.style.cssText = 'background: #f9fafb; padding: 10px; border-radius: 5px; margin-bottom: 10px;';
+            div.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+                    <input type="text" class="equipment-name" placeholder="Equipment name" required>
+                    <button type="button" class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
         function saveEvent(e) {
             e.preventDefault();
+
+            const eventImageUrl = document.getElementById('eventImageUrl').value || getRandomDemoImage(DEMO_EVENT_IMAGES);
+            const organizerImageUrl = document.getElementById('organizerImageUrl').value || getRandomDemoImage(DEMO_ORGANIZER_IMAGES);
 
             const data = {
                 title: document.getElementById('eventTitle').value,
                 description: document.getElementById('eventDescription').value,
                 category: document.getElementById('eventCategory').value,
+                status: document.getElementById('eventStatus').value,
                 event_date: document.getElementById('eventDate').value,
                 start_time: document.getElementById('eventStartTime').value,
                 end_time: document.getElementById('eventEndTime').value,
                 location: document.getElementById('eventLocation').value,
                 price: document.getElementById('eventPrice').value,
                 capacity: document.getElementById('eventCapacity').value,
+                image_url: eventImageUrl,
+                organizer_bio: document.getElementById('organizerBio').value,
+                organizer_image: organizerImageUrl,
+                agenda: collectAgendaItems(),
+                required_equipment: collectEquipmentItems()
             };
 
             fetch(API_BASE + 'admin_events.php?action=create', {
@@ -679,6 +830,9 @@
                 } else {
                     showAlert(d.message, 'error');
                 }
+            })
+            .catch(err => {
+                showAlert('Error saving event: ' + err.message, 'error');
             });
         }
 
