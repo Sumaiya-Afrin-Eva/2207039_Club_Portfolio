@@ -12,11 +12,40 @@
  * Supported actions via GET/POST parameters are processed below.
  */
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_config.php';
+require_once __DIR__ . '/db_functions.php';
 
 // Get request action and HTTP method
 $action = $_GET['action'] ?? null;
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+// Helper function to format event data for frontend
+function format_event_for_frontend($event) {
+    return [
+        'id' => $event['event_id'],  // home-events.js expects 'id'
+        'event_id' => $event['event_id'],
+        'title' => $event['title'],
+        'description' => $event['description'],
+        'category' => $event['category'] ?? '',
+        'status' => $event['status'],
+        'date' => $event['event_date'],  // home-events.js expects 'date'
+        'event_date' => $event['event_date'],
+        'time' => $event['start_time'],  // home-events.js expects 'time'
+        'start_time' => $event['start_time'],
+        'end_time' => $event['end_time'],
+        'location' => $event['location'],
+        'organizer' => $event['organizer_name'] ?? 'Unknown Organizer',
+        'organizer_bio' => $event['organizer_bio'] ?? '',
+        'organizer_image' => $event['organizer_image'] ?? 'https://i.pravatar.cc/150?img=1',
+        'price' => (float)($event['price'] ?? 0),
+        'capacity' => (int)($event['capacity'] ?? 0),
+        'registered_count' => (int)($event['registered_count'] ?? 0),
+        'image_url' => $event['image_url'] ?? 'https://images.unsplash.com/photo-1606608488545-d342b7a9e5a2?w=800&h=600&fit=crop',
+        'agenda' => $event['agenda'] ?? [],
+        'required_equipment' => $event['required_equipment'] ?? [],
+        'comments' => $event['comments'] ?? []
+    ];
+}
 
 // ==================== EVENT RETRIEVAL ENDPOINTS ====================
 
@@ -26,8 +55,9 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
  * Returns: Array of all event objects
  */
 if ($action === 'get_events' && $method === 'GET') {
-    $events = load_json(EVENTS_FILE);
-    respond('success', 'Events retrieved', $events);
+    $events = get_all_events();
+    $formatted_events = array_map('format_event_for_frontend', $events);
+    respond('success', 'Events retrieved', $formatted_events);
 }
 
 
@@ -41,11 +71,10 @@ if ($action === 'get_event' && $method === 'GET') {
     $event_id = $_GET['event_id'] ?? null;
     if (!$event_id) respond('error', 'Event ID required');
     
-    $events = load_json(EVENTS_FILE);
-    $event = array_filter($events, fn($e) => $e['id'] === $event_id);
+    $event = get_event_by_id($event_id);
+    if (!$event) respond('error', 'Event not found');
     
-    if (empty($event)) respond('error', 'Event not found');
-    respond('success', 'Event found', reset($event));
+    respond('success', 'Event found', format_event_for_frontend($event));
 }
 
 
@@ -77,55 +106,49 @@ if ($action === 'register' && $method === 'POST') {
         }
     }
     
-    // Load events and find the target event
-    $events = load_json(EVENTS_FILE);
-    $event = current(array_filter($events, fn($e) => $e['id'] === $input['event_id']));
-    
+    // Check if event exists and has capacity
+    $event = get_event_by_id($input['event_id']);
     if (!$event) respond('error', 'Event not found');
     
-    // Check if event has available capacity
     if ($event['registered_count'] >= $event['capacity']) {
         respond('error', 'Event is full');
     }
     
-    $registrations = load_json(REGISTRATIONS_FILE);
-    
-    // Check if user is already registered for this event
-    $existing = array_filter($registrations, fn($r) => 
-        $r['event_id'] === $input['event_id'] && $r['email'] === $input['email']
+    // Check if user already registered
+    $existing = db_fetch_one(
+        "SELECT registration_id FROM registrations WHERE event_id = ? AND email = ?",
+        [$input['event_id'], $input['email']]
     );
     
-    if (!empty($existing)) {
+    if ($existing) {
         respond('error', 'Already registered for this event');
     }
     
-    // Create new registration record
-    $registration = [
-        'id' => generate_id(),
-        'event_id' => $input['event_id'],
-        'name' => $input['name'],
-        'email' => $input['email'],
-        'phone' => $input['phone'],
-        'address' => $input['address'],
-        'institute' => $input['institute'],
-        'gender' => $input['gender'],
-        'academic_year' => $input['academic_year'],
-        'experience' => $input['experience'],
-        'registered_at' => get_timestamp()
-    ];
+    // Create user if doesn't exist, or get existing user
+    $user = db_fetch_one(
+        "SELECT user_id FROM users WHERE email = ?",
+        [$input['email']]
+    );
     
-    $registrations[] = $registration;
-    
-    // Update event registered count
-    foreach ($events as &$e) {
-        if ($e['id'] === $input['event_id']) {
-            $e['registered_count']++;
-        }
+    if (!$user) {
+        // Create guest user
+        $user_query = "INSERT INTO users (email, full_name, phone, role, is_active) VALUES (?, ?, ?, 'member', 1)";
+        $user_id = db_insert($user_query, [$input['email'], $input['name'], $input['phone']]);
+    } else {
+        $user_id = $user['user_id'];
     }
     
-    // Save updated data
-    if (save_json(REGISTRATIONS_FILE, $registrations) && save_json(EVENTS_FILE, $events)) {
-        respond('success', 'Successfully registered!', $registration);
+    // Create registration
+    $reg_query = "INSERT INTO registrations (event_id, user_id, status) VALUES (?, ?, 'registered')";
+    $registration_id = db_insert($reg_query, [$input['event_id'], $user_id]);
+    
+    if ($registration_id) {
+        respond('success', 'Successfully registered!', [
+            'registration_id' => $registration_id,
+            'event_id' => $input['event_id'],
+            'email' => $input['email'],
+            'name' => $input['name']
+        ]);
     }
     respond('error', 'Registration failed');
 }
@@ -150,22 +173,35 @@ if ($action === 'add_comment' && $method === 'POST') {
         respond('error', 'Required fields missing');
     }
     
-    $comments = load_json(COMMENTS_FILE);
+    // Check if event exists
+    $event = get_event_by_id($input['event_id']);
+    if (!$event) respond('error', 'Event not found');
     
-    // Create new comment record
-    $comment = [
-        'id' => generate_id(),
-        'event_id' => $input['event_id'],
-        'name' => $input['name'],
-        'comment' => $input['comment'],
-        'created_at' => get_timestamp()
-    ];
+    // Get or create user
+    $user = db_fetch_one(
+        "SELECT user_id FROM users WHERE full_name = ?",
+        [$input['name']]
+    );
     
-    $comments[] = $comment;
+    if (!$user) {
+        // Create guest user
+        $user_query = "INSERT INTO users (email, full_name, role, is_active) VALUES (?, ?, 'member', 1)";
+        $user_id = db_insert($user_query, ['guest@clubportfolio.local', $input['name']]);
+    } else {
+        $user_id = $user['user_id'];
+    }
     
-    // Save updated comments
-    if (save_json(COMMENTS_FILE, $comments)) {
-        respond('success', 'Comment added', $comment);
+    // Create comment
+    $comment_query = "INSERT INTO comments (event_id, user_id, comment_text) VALUES (?, ?, ?)";
+    $comment_id = db_insert($comment_query, [$input['event_id'], $user_id, $input['comment']]);
+    
+    if ($comment_id) {
+        respond('success', 'Comment added', [
+            'comment_id' => $comment_id,
+            'event_id' => $input['event_id'],
+            'name' => $input['name'],
+            'comment' => $input['comment']
+        ]);
     }
     respond('error', 'Failed to add comment');
 }
@@ -181,11 +217,27 @@ if ($action === 'get_comments' && $method === 'GET') {
     $event_id = $_GET['event_id'] ?? null;
     if (!$event_id) respond('error', 'Event ID required');
     
-    $comments = load_json(COMMENTS_FILE);
-    // Filter comments for the specific event
-    $event_comments = array_filter($comments, fn($c) => $c['event_id'] === $event_id);
+    $comments = db_select(
+        "SELECT c.*, u.full_name as name FROM comments c
+         LEFT JOIN users u ON c.user_id = u.user_id
+         WHERE c.event_id = ?
+         ORDER BY c.created_at DESC",
+        [$event_id]
+    );
     
-    respond('success', 'Comments retrieved', array_values($event_comments));
+    // Format for frontend
+    $formatted_comments = array_map(function($c) {
+        return [
+            'id' => $c['comment_id'],
+            'comment_id' => $c['comment_id'],
+            'event_id' => $c['event_id'],
+            'name' => $c['name'] ?? 'Anonymous',
+            'comment' => $c['comment_text'],
+            'created_at' => $c['created_at']
+        ];
+    }, $comments);
+    
+    respond('success', 'Comments retrieved', $formatted_comments);
 }
 
 
@@ -208,30 +260,46 @@ if ($action === 'set_reminder' && $method === 'POST') {
         respond('error', 'Event ID and email required');
     }
     
-    $reminders = load_json(REMINDERS_FILE);
+    // Check if event exists
+    $event = get_event_by_id($input['event_id']);
+    if (!$event) respond('error', 'Event not found');
     
-    // Check if reminder already exists for this event and email
-    $existing = array_filter($reminders, fn($r) => 
-        $r['event_id'] === $input['event_id'] && $r['email'] === $input['email']
+    // Get or create user
+    $user = db_fetch_one(
+        "SELECT user_id FROM users WHERE email = ?",
+        [$input['email']]
     );
     
-    if (!empty($existing)) {
-        respond('error', 'Reminder already set');
+    if (!$user) {
+        $user_query = "INSERT INTO users (email, role, is_active) VALUES (?, 'member', 1)";
+        $user_id = db_insert($user_query, [$input['email']]);
+    } else {
+        $user_id = $user['user_id'];
     }
     
-    // Create new reminder record
-    $reminder = [
-        'id' => generate_id(),
-        'event_id' => $input['event_id'],
-        'email' => $input['email'],
-        'created_at' => get_timestamp()
-    ];
+    // Check if reminder already exists
+    $existing = db_fetch_one(
+        "SELECT reminder_id FROM reminders WHERE event_id = ? AND user_id = ?",
+        [$input['event_id'], $user_id]
+    );
     
-    $reminders[] = $reminder;
+    if ($existing) {
+        respond('error', 'Reminder already set for this event');
+    }
     
-    // Save updated reminders
-    if (save_json(REMINDERS_FILE, $reminders)) {
-        respond('success', 'Reminder set', $reminder);
+    // Set reminder for 1 day before the event
+    $event_date = strtotime($event['event_date']);
+    $reminder_time = date('Y-m-d H:i:s', $event_date - (24 * 3600));
+    
+    $reminder_query = "INSERT INTO reminders (event_id, user_id, reminder_time) VALUES (?, ?, ?)";
+    $reminder_id = db_insert($reminder_query, [$input['event_id'], $user_id, $reminder_time]);
+    
+    if ($reminder_id) {
+        respond('success', 'Reminder set successfully', [
+            'reminder_id' => $reminder_id,
+            'event_id' => $input['event_id'],
+            'email' => $input['email']
+        ]);
     }
     respond('error', 'Failed to set reminder');
 }
@@ -247,11 +315,27 @@ if ($action === 'get_registrations' && $method === 'GET') {
     $event_id = $_GET['event_id'] ?? null;
     if (!$event_id) respond('error', 'Event ID required');
     
-    $registrations = load_json(REGISTRATIONS_FILE);
-    // Filter registrations for the specific event
-    $event_regs = array_filter($registrations, fn($r) => $r['event_id'] === $event_id);
+    $regs = db_select(
+        "SELECT r.*, u.full_name, u.email FROM registrations r
+         LEFT JOIN users u ON r.user_id = u.user_id
+         WHERE r.event_id = ?
+         ORDER BY r.registration_date DESC",
+        [$event_id]
+    );
     
-    respond('success', 'Registrations retrieved', array_values($event_regs));
+    // Format for frontend
+    $formatted_regs = array_map(function($r) {
+        return [
+            'registration_id' => $r['registration_id'],
+            'event_id' => $r['event_id'],
+            'name' => $r['full_name'] ?? 'Guest',
+            'email' => $r['email'] ?? 'N/A',
+            'status' => $r['status'],
+            'registered_at' => $r['registration_date']
+        ];
+    }, $regs);
+    
+    respond('success', 'Registrations retrieved', $formatted_regs);
 }
 
 // ==================== ERROR HANDLING ====================
