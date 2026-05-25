@@ -65,7 +65,7 @@ class EventManager {
       const capacityPercent = (event.registered_count / event.capacity) * 100;
 
       return `
-        <div class="event-card" onclick="eventManager.showEventDetail('${event.id}')">
+        <div class="event-card" data-event-id="${event.id}">
           <div class="event-card-image">
             <img src="${event.image_url}" alt="${event.title}" crossorigin="anonymous" />
           </div>
@@ -97,13 +97,54 @@ class EventManager {
             </div>
 
             <div class="event-card-buttons">
-              <button class="event-card-btn view" onclick="event.stopPropagation(); eventManager.showEventDetail('${event.id}')">View Details</button>
-              <button class="event-card-btn remind" onclick="event.stopPropagation(); eventManager.setReminder()">🔔 Remind Me</button>
+              <button class="event-card-btn view" data-action="view-details">View Details</button>
+              <button class="event-card-btn remind" data-action="remind-me">🔔 Remind Me</button>
             </div>
           </div>
         </div>
       `;
     }).join('');
+
+    // Setup event delegation after HTML is generated
+    this.setupEventCardDelegation();
+  }
+
+  setupEventCardDelegation() {
+    const container = document.getElementById('eventsContainer');
+    if (!container) return;
+
+    // Remove old listener if it exists
+    container.removeEventListener('click', this.eventCardClickHandler);
+
+    // Create handler function with proper 'this' binding
+    this.eventCardClickHandler = (e) => {
+      e.stopPropagation();
+      
+      // Check if View Details button was clicked
+      const viewBtn = e.target.closest('.event-card-btn.view');
+      if (viewBtn) {
+        const eventId = parseInt(viewBtn.closest('.event-card').getAttribute('data-event-id'), 10);
+        this.showEventDetail(eventId);
+        return;
+      }
+
+      // Check if Remind Me button was clicked
+      const remindBtn = e.target.closest('.event-card-btn.remind');
+      if (remindBtn) {
+        this.setReminder();
+        return;
+      }
+
+      // Check if event card was clicked
+      const card = e.target.closest('.event-card');
+      if (card && !e.target.closest('button')) {
+        const eventId = parseInt(card.getAttribute('data-event-id'), 10);
+        this.showEventDetail(eventId);
+      }
+    };
+
+    // Attach event delegation listener using capture phase
+    container.addEventListener('click', this.eventCardClickHandler, true);
   }
 
   displayPastEvents(events) {
@@ -116,7 +157,7 @@ class EventManager {
     }
 
     container.innerHTML = events.map(event => `
-      <div class="event-card" onclick="eventManager.showEventDetail('${event.id}')">
+      <div class="event-card" data-event-id="${event.id}">
         <div class="event-card-image" style="opacity: 0.7;">
           <img src="${event.image_url}" alt="${event.title}" crossorigin="anonymous" />
         </div>
@@ -127,10 +168,44 @@ class EventManager {
           </div>
           <h3 class="event-card-title">${event.title}</h3>
           <p class="event-card-description">${event.description}</p>
-          <button class="btn" onclick="event.stopPropagation(); eventManager.showEventDetail('${event.id}')">View Highlights</button>
+          <button class="btn event-highlights-btn" data-action="view-highlights">View Highlights</button>
         </div>
       </div>
     `).join('');
+
+    // Setup event delegation
+    this.setupPastEventDelegation();
+  }
+
+  setupPastEventDelegation() {
+    const container = document.getElementById('pastEventsContainer');
+    if (!container) return;
+
+    // Remove old listener if it exists
+    container.removeEventListener('click', this.pastEventClickHandler);
+
+    // Create handler function with proper 'this' binding
+    this.pastEventClickHandler = (e) => {
+      e.stopPropagation();
+      
+      // Check if button was clicked
+      const btn = e.target.closest('button');
+      if (btn) {
+        const eventId = parseInt(btn.closest('.event-card').getAttribute('data-event-id'), 10);
+        this.showEventDetail(eventId);
+        return;
+      }
+
+      // Check if card was clicked
+      const card = e.target.closest('.event-card');
+      if (card) {
+        const eventId = parseInt(card.getAttribute('data-event-id'), 10);
+        this.showEventDetail(eventId);
+      }
+    };
+
+    // Attach event delegation listener using capture phase
+    container.addEventListener('click', this.pastEventClickHandler, true);
   }
 
   getStatusBadge(status) {
@@ -397,8 +472,8 @@ class EventManager {
   }
 }
 
-// Global event manager instance
-let eventManager = new EventManager();
+// Global event manager instance - use var for global scope accessibility
+var eventManager = new EventManager();
 
 // UI Functions
 function closeEventDetail() {
