@@ -396,16 +396,17 @@
                     <h2>Event Registrations</h2>
                     <div class="card">
                         <div class="form-group">
-                            <label>Select Event:</label>
+                            <label>Filter by Event:</label>
                             <select id="eventSelectForRegistrations" onchange="loadEventRegistrations()">
-                                <option value="">-- Choose Event --</option>
+                                <option value="">-- All Events --</option>
                             </select>
                         </div>
                         <table id="registrationsTable">
                             <thead>
                                 <tr>
-                                    <th>User</th>
+                                    <th>Participant Name</th>
                                     <th>Email</th>
+                                    <th>Event</th>
                                     <th>Registered Date</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -421,17 +422,17 @@
                     <h2>Event Comments</h2>
                     <div class="card">
                         <div class="form-group">
-                            <label>Select Event:</label>
+                            <label>Filter by Event:</label>
                             <select id="eventSelectForComments" onchange="loadEventComments()">
-                                <option value="">-- Choose Event --</option>
+                                <option value="">-- All Events --</option>
                             </select>
                         </div>
                         <table id="commentsTable">
                             <thead>
                                 <tr>
+                                    <th>Event</th>
                                     <th>User</th>
                                     <th>Comment</th>
-                                    <th>Rating</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
@@ -448,7 +449,7 @@
     <div id="eventModal" class="modal">
         <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
-                <h2>Create/Edit Event</h2>
+                <h2>Create/Update Event</h2>
                 <button class="modal-close" onclick="closeEventModal()">×</button>
             </div>
             <form id="eventForm" onsubmit="saveEvent(event)" style="max-height: 80vh; overflow-y: auto;">
@@ -569,7 +570,7 @@
     <div id="userModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Create/Edit User</h2>
+                <h2>Create/Update User</h2>
                 <button class="modal-close" onclick="closeUserModal()">×</button>
             </div>
             <form id="userForm" onsubmit="saveUser(event)">
@@ -661,13 +662,16 @@
             Promise.all([
                 fetch(API_BASE + 'admin_events.php?action=list'),
                 fetch(API_BASE + 'admin_users.php?action=list'),
+                fetch(API_BASE + 'admin_events.php?action=registrations'),
             ]).then(rs => Promise.all(rs.map(r => r.json())))
               .then(ds => {
                   const events = ds[0].data || [];
                   const users = ds[1].data || [];
+                  const registrations = ds[2].data || [];
 
                   document.getElementById('totalEvents').textContent = events.length;
                   document.getElementById('totalUsers').textContent = users.length;
+                  document.getElementById('totalRegistrations').textContent = registrations.length;
                   document.getElementById('upcomingEvents').textContent = 
                       events.filter(e => e.status === 'upcoming').length;
               });
@@ -691,7 +695,7 @@
                                 <td>${event.status}</td>
                                 <td>${event.registered_count}/${event.capacity}</td>
                                 <td>
-                                    <button class="btn btn-primary" onclick="editEvent(${event.event_id})">Edit</button>
+                                    <button class="btn btn-primary" onclick="editEvent(${event.event_id})">Update</button>
                                     <button class="btn btn-danger" onclick="deleteEvent(${event.event_id})">Delete</button>
                                 </td>
                             </tr>
@@ -710,12 +714,47 @@
                 });
         }
 
+        let currentEditingEventId = null;
+
+        function editEvent(eventId) {
+            currentEditingEventId = eventId;
+            fetch(API_BASE + 'admin_events.php?action=get&event_id=' + eventId)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.status === 'success') {
+                        const event = d.data;
+                        document.getElementById('eventTitle').value = event.title;
+                        document.getElementById('eventDescription').value = event.description;
+                        document.getElementById('eventCategory').value = event.category;
+                        document.getElementById('eventStatus').value = event.status;
+                        document.getElementById('eventDate').value = event.event_date;
+                        document.getElementById('eventStartTime').value = event.start_time;
+                        document.getElementById('eventEndTime').value = event.end_time;
+                        document.getElementById('eventLocation').value = event.location;
+                        document.getElementById('eventPrice').value = event.price;
+                        document.getElementById('eventCapacity').value = event.capacity;
+                        document.getElementById('eventImageUrl').value = event.image_url || '';
+                        document.getElementById('organizerBio').value = event.organizer_bio || '';
+                        document.getElementById('organizerImageUrl').value = event.organizer_image || '';
+                        
+                        document.querySelector('#eventForm button[type="submit"]').textContent = 'Update Event';
+                        document.getElementById('eventModal').classList.add('active');
+                    } else {
+                        showAlert(d.message, 'error');
+                    }
+                });
+        }
+
         function openEventModal() {
+            currentEditingEventId = null;
             document.getElementById('eventForm').reset();
+            document.querySelector('#eventForm button[type="submit"]').textContent = 'Create Event';
             document.getElementById('eventModal').classList.add('active');
         }
 
         function closeEventModal() {
+            currentEditingEventId = null;
+            document.querySelector('#eventForm button[type="submit"]').textContent = 'Create Event';
             document.getElementById('eventModal').classList.remove('active');
         }
 
@@ -816,7 +855,16 @@
                 required_equipment: collectEquipmentItems()
             };
 
-            fetch(API_BASE + 'admin_events.php?action=create', {
+            const action = currentEditingEventId ? 'update' : 'create';
+            const url = currentEditingEventId
+                ? API_BASE + 'admin_events.php?action=update'
+                : API_BASE + 'admin_events.php?action=create';
+
+            if (currentEditingEventId) {
+                data.event_id = currentEditingEventId;
+            }
+
+            fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -824,7 +872,9 @@
             .then(r => r.json())
             .then(d => {
                 if (d.status === 'success') {
-                    showAlert('Event saved successfully!', 'success');
+                    showAlert(currentEditingEventId ? 'Event updated successfully!' : 'Event saved successfully!', 'success');
+                    currentEditingEventId = null;
+                    document.querySelector('#eventForm button[type="submit"]').textContent = 'Create Event';
                     closeEventModal();
                     loadEvents();
                 } else {
@@ -867,12 +917,13 @@
                     users.forEach(user => {
                         tbody.innerHTML += `
                             <tr>
-                                <td>${user.email}</td>
+                                <td>${user.email || 'null'}</td>
                                 <td>${user.full_name}</td>
                                 <td>${user.role}</td>
                                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                                 <td>
-                                    <button class="btn btn-danger" onclick="deleteUser(${user.user_id})">Delete</button>
+                                    <button class="btn btn-warning" onclick="updateUser(${user.user_id}, '${escapeHtml(user.email || '')}', '${escapeHtml(user.full_name)}', '${user.role}')">Update</button>
+                                    <button class="btn btn-danger" onclick="deleteUser(${user.user_id}, '${escapeHtml(user.full_name)}')">Delete</button>
                                 </td>
                             </tr>
                         `;
@@ -880,12 +931,28 @@
                 });
         }
 
+        let currentEditingUserId = null;
+
+        function updateUser(userId, email, fullName, role) {
+            currentEditingUserId = userId;
+            document.getElementById('userEmail').value = email;
+            document.getElementById('userName').value = fullName;
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userRole').value = role;
+            document.querySelector('#userForm button[type="submit"]').textContent = 'Update User';
+            document.getElementById('userModal').classList.add('active');
+        }
+
         function openUserModal() {
+            currentEditingUserId = null;
             document.getElementById('userForm').reset();
+            document.querySelector('#userForm button[type="submit"]').textContent = 'Create User';
             document.getElementById('userModal').classList.add('active');
         }
 
         function closeUserModal() {
+            currentEditingUserId = null;
+            document.querySelector('#userForm button[type="submit"]').textContent = 'Create User';
             document.getElementById('userModal').classList.remove('active');
         }
 
@@ -899,7 +966,12 @@
                 role: document.getElementById('userRole').value,
             };
 
-            fetch(API_BASE + 'admin_users.php?action=create', {
+            const action = currentEditingUserId ? 'update' : 'create';
+            const url = currentEditingUserId 
+                ? API_BASE + 'admin_users.php?action=update&user_id=' + currentEditingUserId
+                : API_BASE + 'admin_users.php?action=create';
+
+            fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -907,7 +979,9 @@
             .then(r => r.json())
             .then(d => {
                 if (d.status === 'success') {
-                    showAlert('User created!', 'success');
+                    showAlert(currentEditingUserId ? 'User updated!' : 'User created!', 'success');
+                    currentEditingUserId = null;
+                    document.querySelector('#userForm button[type="submit"]').textContent = 'Create User';
                     closeUserModal();
                     loadUsers();
                 } else {
@@ -916,74 +990,205 @@
             });
         }
 
-        function deleteUser(id) {
-            if(!confirm('Delete this user?')) return;
-            // Implement delete user API
+        function deleteUser(id, userName) {
+            if(!confirm('Delete user "' + userName + '"?')) return;
+            
+            fetch(API_BASE + 'admin_users.php?action=delete&user_id=' + id, {
+                method: 'DELETE'
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.status === 'success') {
+                    showAlert('User deleted!', 'success');
+                    loadUsers();
+                } else {
+                    showAlert(d.message, 'error');
+                }
+            })
+            .catch(err => showAlert('Error deleting user', 'error'));
         }
 
         // Registrations
+        let allRegistrations = [];
+
         function loadRegistrations() {
-            loadEvents();
+            // Load all events for filter dropdown
+            fetch(API_BASE + 'admin_events.php?action=list')
+                .then(r => r.json())
+                .then(d => {
+                    const events = d.data || [];
+                    const select = document.getElementById('eventSelectForRegistrations');
+                    select.innerHTML = '<option value="">-- All Events --</option>';
+                    
+                    events.forEach(event => {
+                        const option = document.createElement('option');
+                        option.value = event.event_id;
+                        option.textContent = event.title;
+                        select.appendChild(option);
+                    });
+                });
+
+            // Load all registrations
+            loadAllRegistrations();
+        }
+
+        function loadAllRegistrations() {
+            fetch(API_BASE + 'admin_events.php?action=registrations')
+                .then(r => r.json())
+                .then(d => {
+                    allRegistrations = d.data || [];
+                    displayRegistrations(allRegistrations);
+                })
+                .catch(err => {
+                    console.error('Error loading registrations:', err);
+                    showAlert('Failed to load registrations', 'error');
+                });
         }
 
         function loadEventRegistrations() {
             const eventId = document.getElementById('eventSelectForRegistrations').value;
-            if (!eventId) return;
+            
+            if (!eventId) {
+                // Show all registrations
+                displayRegistrations(allRegistrations);
+            } else {
+                // Filter registrations by event
+                const filtered = allRegistrations.filter(reg => reg.event_id == eventId);
+                displayRegistrations(filtered);
+            }
+        }
 
-            fetch(API_BASE + 'admin_events.php?action=registrations&event_id=' + eventId)
-                .then(r => r.json())
-                .then(d => {
-                    const registrations = d.data || [];
-                    const tbody = document.querySelector('#registrationsTable tbody');
-                    tbody.innerHTML = '';
+        function displayRegistrations(registrations) {
+            const tbody = document.querySelector('#registrationsTable tbody');
+            tbody.innerHTML = '';
 
-                    registrations.forEach(reg => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${reg.full_name}</td>
-                                <td>${reg.email}</td>
-                                <td>${new Date(reg.registration_date).toLocaleDateString()}</td>
-                                <td>${reg.status}</td>
-                                <td><button class="btn btn-secondary">Mark Checked In</button></td>
-                            </tr>
-                        `;
-                    });
-                });
+            if (registrations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">No registrations found</td></tr>';
+                return;
+            }
+
+            registrations.forEach(reg => {
+                const statusBadge = `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; 
+                    ${reg.status === 'attended' ? 'background: #d4edda; color: #155724;' : 
+                      reg.status === 'cancelled' ? 'background: #f8d7da; color: #721c24;' :
+                      'background: #cfe2ff; color: #084298;'}">
+                    ${reg.status.charAt(0).toUpperCase() + reg.status.slice(1)}
+                </span>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${reg.full_name || 'N/A'}</strong></td>
+                        <td>${reg.email || 'N/A'}</td>
+                        <td>${reg.event_title || 'N/A'}</td>
+                        <td>${new Date(reg.registration_date).toLocaleDateString()}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            ${reg.status !== 'attended' ? `<button class="btn btn-secondary" onclick="markAttended(${reg.registration_id})">Mark Checked In</button>` : '<span style="color: #28a745;">✓ Checked In</span>'}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function markAttended(registrationId) {
+            fetch(API_BASE + 'crud_registrations.php?action=update&id=' + registrationId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'attended' })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.status === 'success') {
+                    showAlert('Registration updated to attended', 'success');
+                    loadAllRegistrations();
+                } else {
+                    showAlert(d.message || 'Failed to update registration', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showAlert('Error updating registration', 'error');
+            });
         }
 
         // Comments
         function loadComments() {
+            // Load events for dropdown
             loadEvents();
+            // Load all comments by default
+            loadAllComments();
+        }
+
+        function loadAllComments() {
+            fetch(API_BASE + 'admin_events.php?action=comments')
+                .then(r => r.json())
+                .then(d => {
+                    displayComments(d.data || []);
+                })
+                .catch(err => console.error('Failed to load comments:', err));
         }
 
         function loadEventComments() {
             const eventId = document.getElementById('eventSelectForComments').value;
-            if (!eventId) return;
+            if (!eventId) {
+                // Load all comments when no event selected
+                loadAllComments();
+                return;
+            }
 
             fetch(API_BASE + 'admin_events.php?action=comments&event_id=' + eventId)
                 .then(r => r.json())
                 .then(d => {
-                    const comments = d.data || [];
-                    const tbody = document.querySelector('#commentsTable tbody');
-                    tbody.innerHTML = '';
-
-                    comments.forEach(comment => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${comment.full_name}</td>
-                                <td>${comment.comment_text.substring(0, 50)}...</td>
-                                <td>${comment.rating || '-'}</td>
-                                <td>${new Date(comment.created_at).toLocaleDateString()}</td>
-                                <td><button class="btn btn-danger" onclick="deleteComment(${comment.comment_id})">Delete</button></td>
-                            </tr>
-                        `;
-                    });
-                });
+                    displayComments(d.data || []);
+                })
+                .catch(err => console.error('Failed to load comments:', err));
         }
 
-        function deleteComment(id) {
-            if(!confirm('Delete this comment?')) return;
-            // Implement delete comment API
+        function displayComments(comments) {
+            const tbody = document.querySelector('#commentsTable tbody');
+            tbody.innerHTML = '';
+
+            if (comments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No comments yet.</td></tr>';
+                return;
+            }
+
+            comments.forEach(comment => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${escapeHtml(comment.event_title || 'Unknown Event')}</strong></td>
+                        <td>${escapeHtml(comment.full_name)}</td>
+                        <td>${escapeHtml(comment.comment_text.substring(0, 100))}${comment.comment_text.length > 100 ? '...' : ''}</td>
+                        <td>${new Date(comment.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteComment(${comment.comment_id}, '${escapeHtml(comment.full_name)}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function deleteComment(id, userName) {
+            if(!confirm(`Delete comment from ${userName}?`)) return;
+            
+            fetch(API_BASE + 'admin_events.php?action=delete_comment&comment_id=' + id, {
+                method: 'DELETE'
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.status === 'success') {
+                    loadEventComments();
+                } else {
+                    alert('Failed to delete comment: ' + (d.message || 'Unknown error'));
+                }
+            })
+            .catch(err => console.error('Error deleting comment:', err));
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Utilities

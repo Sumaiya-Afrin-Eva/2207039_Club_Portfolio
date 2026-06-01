@@ -15,6 +15,15 @@
 require_once __DIR__ . '/db_config.php';
 require_once __DIR__ . '/db_functions.php';
 
+// Set headers for JSON response
+header('Content-Type: application/json');
+
+// Global error handler
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    log_error("PHP Error: [$errno] $errstr in $errfile:$errline");
+    respond('error', 'Server error: ' . $errstr);
+});
+
 // Get request action and HTTP method
 $action = $_GET['action'] ?? null;
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -98,30 +107,39 @@ if ($action === 'get_event' && $method === 'GET') {
 if ($action === 'register' && $method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     
+    // Check if JSON parsing failed
+    if ($input === null) {
+        log_error("Registration: JSON parsing failed - " . json_last_error_msg());
+        respond('error', 'Invalid JSON in request body');
+    }
+    
+    log_error("Registration attempt with data: " . json_encode($input));
+    
     // Validate required fields
     $required = ['event_id', 'name', 'email', 'phone', 'address', 'institute', 'gender', 'academic_year', 'experience'];
     foreach ($required as $field) {
         if (empty($input[$field])) {
+            log_error("Registration: Missing field - $field");
             respond('error', "Field '$field' is required");
         }
     }
     
-    // Check if event exists and has capacity
-    $event = get_event_by_id($input['event_id']);
-    if (!$event) respond('error', 'Event not found');
+    // Ensure event_id is an integer
+    $event_id = (int)$input['event_id'];
+    log_error("Registration: Processing event_id=$event_id");
     
-    if ($event['registered_count'] >= $event['capacity']) {
-        respond('error', 'Event is full');
+    // Check if event exists and has capacity
+    $event = get_event_by_id($event_id);
+    if (!$event) {
+        log_error("Registration: Event not found - event_id=$event_id");
+        respond('error', 'Event not found');
     }
     
-    // Check if user already registered
-    $existing = db_fetch_one(
-        "SELECT registration_id FROM registrations WHERE event_id = ? AND email = ?",
-        [$input['event_id'], $input['email']]
-    );
+    log_error("Registration: Event found - " . $event['title'] . " (registered: {$event['registered_count']}/{$event['capacity']})");
     
-    if ($existing) {
-        respond('error', 'Already registered for this event');
+    if ($event['registered_count'] >= $event['capacity']) {
+        log_error("Registration: Event full - event_id=$event_id");
+        respond('error', 'Event is full');
     }
     
     // Create user if doesn't exist, or get existing user
@@ -130,27 +148,60 @@ if ($action === 'register' && $method === 'POST') {
         [$input['email']]
     );
     
-    if (!$user) {
-        // Create guest user
-        $user_query = "INSERT INTO users (email, full_name, phone, role, is_active) VALUES (?, ?, ?, 'member', 1)";
-        $user_id = db_insert($user_query, [$input['email'], $input['name'], $input['phone']]);
-    } else {
-        $user_id = $user['user_id'];
+    $user_id = null;
+    if ($user) {
+        $user_id = (int)$user['user_id'];
+        log_error("Registration: Using existing user - user_id=$user_id");
+        
+        // Check if user already registered for this event
+        $existing = db_fetch_one(
+            "SELECT registration_id FROM registrations WHERE event_id = ? AND user_id = ?",
+            [$event_id, $user_id]
+        );
+        
+        if ($existing) {
+            log_error("Registration: Already registered - email=" . $input['email']);
+            respond('error', 'Already registered for this event');
+        }
     }
     
-    // Create registration
+    if (!$user) {
+        // Create guest user - cast to proper types
+        log_error("Registration: Creating new user - email=" . $input['email']);
+        $user_query = "INSERT INTO users (email, full_name, phone, password, role, is_active) VALUES (?, ?, ?, '', 'member', 1)";
+        $user_id = db_insert($user_query, [
+            $input['email'],
+            $input['name'],
+            $input['phone']
+        ]);
+        
+        if (!$user_id) {
+            log_error("Registration: Failed to create user - email=" . $input['email']);
+            respond('error', 'Failed to create user account');
+        }
+        log_error("Registration: User created with id=$user_id");
+    }
+    
+    // Create registration - ensure types are correct
+    log_error("Registration: Creating registration for user_id=$user_id, event_id=$event_id");
     $reg_query = "INSERT INTO registrations (event_id, user_id, status) VALUES (?, ?, 'registered')";
-    $registration_id = db_insert($reg_query, [$input['event_id'], $user_id]);
+    $registration_id = db_insert($reg_query, [
+        $event_id,
+        $user_id
+    ]);
     
     if ($registration_id) {
+        log_error("Registration: Success - registration_id=$registration_id");
         respond('success', 'Successfully registered!', [
             'registration_id' => $registration_id,
-            'event_id' => $input['event_id'],
+            'event_id' => $event_id,
             'email' => $input['email'],
             'name' => $input['name']
         ]);
+    } else {
+        log_error("Registration: Failed to create registration record");
+        respond('error', 'Failed to create registration record');
     }
-    respond('error', 'Registration failed');
 }
 
 
@@ -168,14 +219,31 @@ if ($action === 'register' && $method === 'POST') {
 if ($action === 'add_comment' && $method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     
+    // Check if JSON parsing failed
+    if ($input === null) {
+        log_error("Comment: JSON parsing failed - " . json_last_error_msg());
+        respond('error', 'Invalid JSON in request body');
+    }
+    
+    log_error("Comment attempt with data: " . json_encode($input));
+    
     // Validate required fields
     if (empty($input['event_id']) || empty($input['name']) || empty($input['comment'])) {
+        log_error("Comment: Missing required fields");
         respond('error', 'Required fields missing');
     }
     
+    // Ensure event_id is an integer
+    $event_id = (int)$input['event_id'];
+    
     // Check if event exists
-    $event = get_event_by_id($input['event_id']);
-    if (!$event) respond('error', 'Event not found');
+    $event = get_event_by_id($event_id);
+    if (!$event) {
+        log_error("Comment: Event not found - event_id=$event_id");
+        respond('error', 'Event not found');
+    }
+    
+    log_error("Comment: Processing for event - " . $event['title']);
     
     // Get or create user
     $user = db_fetch_one(
@@ -184,24 +252,36 @@ if ($action === 'add_comment' && $method === 'POST') {
     );
     
     if (!$user) {
-        // Create guest user
-        $user_query = "INSERT INTO users (email, full_name, role, is_active) VALUES (?, ?, 'member', 1)";
-        $user_id = db_insert($user_query, ['guest@clubportfolio.local', $input['name']]);
+        // Create guest user - include password field
+        log_error("Comment: Creating guest user - name=" . $input['name']);
+        $user_query = "INSERT INTO users (email, full_name, password, role, is_active) VALUES (NULL, ?, '', 'member', 1)";
+        $user_id = db_insert($user_query, [$input['name']]);
+        
+        if (!$user_id) {
+            log_error("Comment: Failed to create user - name=" . $input['name']);
+            respond('error', 'Failed to create user account');
+        }
+        log_error("Comment: User created with id=$user_id");
     } else {
-        $user_id = $user['user_id'];
+        $user_id = (int)$user['user_id'];
+        log_error("Comment: Using existing user - user_id=$user_id");
     }
     
     // Create comment
+    log_error("Comment: Creating comment for user_id=$user_id, event_id=$event_id");
     $comment_query = "INSERT INTO comments (event_id, user_id, comment_text) VALUES (?, ?, ?)";
-    $comment_id = db_insert($comment_query, [$input['event_id'], $user_id, $input['comment']]);
+    $comment_id = db_insert($comment_query, [$event_id, $user_id, $input['comment']]);
     
     if ($comment_id) {
+        log_error("Comment: Success - comment_id=$comment_id");
         respond('success', 'Comment added', [
             'comment_id' => $comment_id,
-            'event_id' => $input['event_id'],
+            'event_id' => $event_id,
             'name' => $input['name'],
             'comment' => $input['comment']
         ]);
+    } else {
+        log_error("Comment: Failed to create comment record");
     }
     respond('error', 'Failed to add comment');
 }
