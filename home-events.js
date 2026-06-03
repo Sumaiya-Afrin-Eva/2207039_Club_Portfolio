@@ -502,9 +502,24 @@ function closeConfirmation() {
 async function submitRegistration(e) {
   e.preventDefault();
   
+  console.log('=== Registration Submission Started ===');
+  console.log('Current Event ID:', eventManager.currentEventId);
+  
+  if (!eventManager.currentEventId) {
+    alert('Error: No event selected. Please go back and select an event.');
+    return;
+  }
+  
   const form = document.getElementById('eventRegistrationForm');
   const formData = new FormData(form);
   const event = eventManager.events.find(ev => ev.id === eventManager.currentEventId);
+
+  if (!event) {
+    console.error('Event not found in eventManager.events');
+    console.log('Available events:', eventManager.events.map(e => e.id));
+    alert('Error: Event not found. Please refresh and try again.');
+    return;
+  }
 
   const registrationData = {
     event_id: eventManager.currentEventId,
@@ -518,6 +533,22 @@ async function submitRegistration(e) {
     experience: formData.get('experience')
   };
 
+  // Validate all fields are filled
+  const missingFields = [];
+  for (const [key, value] of Object.entries(registrationData)) {
+    if (!value || value === '') {
+      missingFields.push(key);
+    }
+  }
+  
+  if (missingFields.length > 0) {
+    alert(`Please fill in all required fields:\n${missingFields.join(', ')}`);
+    return;
+  }
+
+  console.log('Registration Data:', registrationData);
+  console.log('Sending to:', `${API_BASE}?action=register`);
+
   try {
     const response = await fetch(`${API_BASE}?action=register`, {
       method: 'POST',
@@ -525,11 +556,23 @@ async function submitRegistration(e) {
       body: JSON.stringify(registrationData)
     });
 
+    console.log('Response Status:', response.status);
+    console.log('Response OK:', response.ok);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
     const data = await response.json();
+    console.log('Response Data:', data);
 
     if (data.status === 'success') {
+      console.log('Registration successful!');
+      
       // Update event registered count
-      event.registered_count++;
+      if (event) {
+        event.registered_count++;
+      }
 
       // Show confirmation modal
       document.getElementById('confirmEventName').textContent = event.title;
@@ -544,11 +587,14 @@ async function submitRegistration(e) {
       // Reload events to update UI
       setTimeout(() => eventManager.loadEvents(), 1000);
     } else {
-      alert(data.message || 'Registration failed');
+      // Display the specific error message from the server
+      const errorMsg = data.message || 'Registration failed. Please try again.';
+      console.error('Registration error:', errorMsg);
+      alert('Registration Error:\n' + errorMsg);
     }
   } catch (error) {
-    console.error('Error:', error);
-    alert('Error submitting registration');
+    console.error('Network or parsing error:', error);
+    alert('Error submitting registration:\n' + error.message + '\n\nPlease check the browser console for details.');
   }
 }
 
