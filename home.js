@@ -1,8 +1,9 @@
-// Configuration settings
+// Configuration settings home.js file
 const CONFIG = {
   MAX_PHOTO_SIZE: 5 * 1024 * 1024, // Max upload size (5MB)
   PHOTOS_PER_PAGE: 12, // Photos shown on main gallery
   STORAGE_KEY: 'photoclub_photos',// Key for localStorage
+  API_BASE: '/Club_Portfolio/api/', // API base URL
   // Default images (shown if no saved data)
   DEFAULT_PHOTOS: [
     {
@@ -241,39 +242,7 @@ function setupExploreButton() {
     });
   }
 }
-// Handle contact form submission
-function setupContactForm() {
-  const form = document.getElementById('contactForm');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
 
-      const inputs = form.querySelectorAll('input, textarea');
-      const name = inputs[0].value;
-      const email = inputs[1].value;
-      const message = inputs[2].value;
-
-      try {
-        // Send data to fake API
-        const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, message })
-        });
-
-        if (res.ok) {
-          alert('Message sent successfully!');
-          form.reset();
-        } else {
-          alert('Error sending message.');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error sending message.');
-      }
-    });
-  }
-}
 // Lightbox state
 let currentLightboxPhotos = [];
 let currentLightboxIndex = 0;
@@ -319,7 +288,7 @@ document.addEventListener('keydown', (e) => {
   const adminPanel = document.getElementById('adminPanel');
   const fullGalleryPage = document.getElementById('fullGalleryPage');
 
-  if (lightbox.style.display === 'flex') {
+  if (lightbox && lightbox.style.display === 'flex') {
     if (e.key === 'ArrowRight') {
       navigateLightbox(1);
     } else if (e.key === 'ArrowLeft') {
@@ -327,20 +296,202 @@ document.addEventListener('keydown', (e) => {
     } else if (e.key === 'Escape') {
       closeLightbox();
     }
-  } else if (adminPanel.classList.contains('active')) {
+  }
+  else if (adminPanel && adminPanel.classList.contains('active')) {
     if (e.key === 'Escape') {
       closeAdminPanel();
     }
-  } else if (fullGalleryPage.style.display === 'block') {
+  }
+  else if (fullGalleryPage && fullGalleryPage.style.display === 'block') {
     if (e.key === 'Escape') {
       backToMain();
     }
   }
 });
+
+// ============================================
+// TEAM MEMBERS LOADING FROM DATABASE - FIXED
+// ============================================
+function loadTeamMembers() {
+    console.log("loadTeamMembers() called");
+  const teamContainer = document.getElementById('teamContainer');
+  if (!teamContainer) {
+    console.warn('Team container not found on page');
+    return;
+  }
+  
+  console.log('Loading team members from API...');
+  
+  fetch(CONFIG.API_BASE + 'crud_team.php')
+    .then(response => {
+      console.log('Team API response status:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('Team API response data:', data);
+      let team = [];
+      
+      if (data.status === 'success' && data.data) {
+        team = data.data;
+      } else if (data.data) {
+        team = data.data;
+      }
+      
+      // Filter only active team members for website display
+      const activeTeam = team.filter(member => member.is_active == 1);
+      console.log('Active team members found:', activeTeam.length);
+      
+      if (activeTeam.length === 0) {
+        teamContainer.innerHTML = '<div class="no-data-message"><p>No team members available.</p></div>';
+        return;
+      }
+      
+      teamContainer.innerHTML = '';
+      activeTeam.forEach(member => {
+        const memberDiv = document.createElement('div');
+        memberDiv.className = 'member';
+        const defaultImage = 'https://i.pravatar.cc/150?img=' + (member.team_id % 10);
+        memberDiv.innerHTML = `
+          ${member.image_url ? `<img src="${escapeHtml(member.image_url)}" alt="${escapeHtml(member.full_name)}" onerror="this.src='${defaultImage}'">` : `<img src="${defaultImage}" alt="${escapeHtml(member.full_name)}">`}
+          <h4>${escapeHtml(member.full_name)}</h4>
+          <p>${escapeHtml(member.position)}</p>
+          ${member.bio ? `<p class="member-bio">${escapeHtml(member.bio.substring(0, 100))}${member.bio.length > 100 ? '...' : ''}</p>` : ''}
+        `;
+        teamContainer.appendChild(memberDiv);
+      });
+    })
+    .catch(error => {
+      console.error('Error loading team members:', error);
+      const teamContainer = document.getElementById('teamContainer');
+      if (teamContainer) {
+        teamContainer.innerHTML = '<div class="error-message"><p>Error loading team members. Please try again later.</p></div>';
+      }
+    });
+}
+
+// ============================================
+// CONTACT FORM SUBMISSION TO DATABASE - FIXED
+// ============================================
+function setupContactFormSubmission() {
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    // Remove any old event listeners
+    const newForm = contactForm.cloneNode(true);
+    contactForm.parentNode.replaceChild(newForm, contactForm);
+    newForm.addEventListener('submit', submitContactForm);
+    console.log('Contact form event listener attached');
+  }
+}
+
+function submitContactForm(event) {
+  event.preventDefault();
+  
+  console.log('Submitting contact form...');
+  
+  const nameInput = document.getElementById('contactName');
+  const emailInput = document.getElementById('contactEmail');
+  const messageInput = document.getElementById('contactMessageText');
+  
+  // Validate inputs
+  if (!nameInput.value.trim() || !emailInput.value.trim() || !messageInput.value.trim()) {
+    showContactMessage('Please fill in all fields', 'error');
+    return;
+  }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(emailInput.value.trim())) {
+    showContactMessage('Please enter a valid email address', 'error');
+    return;
+  }
+  
+  const data = {
+    full_name: nameInput.value.trim(),
+    email: emailInput.value.trim(),
+    message: messageInput.value.trim()
+  };
+  
+  console.log('Sending contact data:', data);
+  
+  // Send to API
+  fetch(CONFIG.API_BASE + 'crud_contact.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => response.json())
+  .then(result => {
+
+    console.log(result);
+
+    if (result.status === 'success') {
+
+        showContactMessage(
+            'Thank you! Your message has been sent successfully.',
+            'success'
+        );
+
+        document.getElementById('contactName').value = '';
+        document.getElementById('contactEmail').value = '';
+        document.getElementById('contactMessageText').value = '';
+
+    } else {
+
+        showContactMessage(
+            result.message || 'Submission failed',
+            'error'
+        );
+
+    }
+
+})
+}
+
+function showContactMessage(message, type) {
+  const messageDiv = document.getElementById('contactStatusMessage');
+  if (!messageDiv) return;
+  
+  messageDiv.textContent = message;
+  messageDiv.style.display = 'block';
+  messageDiv.style.padding = '15px';
+  messageDiv.style.borderRadius = '5px';
+  messageDiv.style.marginTop = '15px';
+  
+  if (type === 'success') {
+    messageDiv.style.background = '#c6f6d5';
+    messageDiv.style.color = '#22543d';
+    messageDiv.style.border = '1px solid #9ae6b4';
+  } else {
+    messageDiv.style.background = '#fed7d7';
+    messageDiv.style.color = '#742a2a';
+    messageDiv.style.border = '1px solid #fc8181';
+  }
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    messageDiv.style.display = 'none';
+  }, 5000);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
   loadGallery();
   setupExploreButton();
-  setupContactForm();
+  setupContactFormSubmission();
   setupSearchFunctionality();
+  loadTeamMembers(); // Load team members from database
 });
