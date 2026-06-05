@@ -1,5 +1,5 @@
 const API_BASE = 'api/events.php';
-
+// home-events.js - Event management and UI logic for events section
 class EventManager {
 
   constructor() {
