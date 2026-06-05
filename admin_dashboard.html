@@ -302,6 +302,8 @@
                 <li><a href="#" data-view="dashboard" class="nav-link active">Dashboard</a></li>
                 <li><a href="#" data-view="events" class="nav-link">Events</a></li>
                 <li><a href="#" data-view="users" class="nav-link">Users</a></li>
+                <li><a href="#" data-view="team" class="nav-link">Team Members</a></li>
+                <li><a href="#" data-view="contacts" class="nav-link">Contact Messages</a></li>
                 <li><a href="#" data-view="registrations" class="nav-link">Registrations</a></li>
                 <li><a href="#" data-view="comments" class="nav-link">Comments</a></li>
             </ul>
@@ -433,6 +435,59 @@
                                     <th>Event</th>
                                     <th>User</th>
                                     <th>Comment</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Team Members View -->
+                <div id="team" class="view hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Manage Team Members</h2>
+                        <button class="btn btn-primary" onclick="openTeamModal()">+ Add Team Member</button>
+                    </div>
+                    <div class="card">
+                        <table id="teamTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Position</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Display Order</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Contact Messages View -->
+                <div id="contacts" class="view hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Contact Form Submissions</h2>
+                        <div>
+                            <select id="contactStatusFilter" onchange="loadContacts()" style="padding: 8px 12px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                                <option value="">All Submissions</option>
+                                <option value="new">New</option>
+                                <option value="read">Read</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <table id="contactsTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Message Preview</th>
+                                    <th>Status</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
@@ -598,6 +653,95 @@
                     <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Team Member Modal -->
+    <div id="teamModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add/Update Team Member</h2>
+                <button class="modal-close" onclick="closeTeamModal()">×</button>
+            </div>
+            <form id="teamForm" onsubmit="saveTeam(event)">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="teamFullName" required>
+                </div>
+                <div class="form-group">
+                    <label>Position *</label>
+                    <input type="text" id="teamPosition" placeholder="e.g., President, Creative Lead" required>
+                </div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea id="teamBio" placeholder="Brief bio about the team member"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="teamEmail">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="teamPhone">
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="teamImageUrl" placeholder="Profile image URL">
+                </div>
+                <div class="form-group">
+                    <label>Display Order</label>
+                    <input type="number" id="teamDisplayOrder" value="0" min="0">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary">Save Team Member</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeTeamModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contact Message Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>View Contact Message</h2>
+                <button class="modal-close" onclick="closeContactModal()">×</button>
+            </div>
+            <div style="max-height: 70vh; overflow-y: auto;">
+                <div class="form-group">
+                    <label>Name:</label>
+                    <p id="contactViewName" style="padding: 10px; background: #f9fafb; border-radius: 5px;"></p>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <p id="contactViewEmail" style="padding: 10px; background: #f9fafb; border-radius: 5px;"></p>
+                </div>
+                <div class="form-group">
+                    <label>Message:</label>
+                    <p id="contactViewMessage" style="padding: 10px; background: #f9fafb; border-radius: 5px; white-space: pre-wrap;"></p>
+                </div>
+                <div class="form-group">
+                    <label>Date Submitted:</label>
+                    <p id="contactViewDate" style="padding: 10px; background: #f9fafb; border-radius: 5px;"></p>
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select id="contactViewStatus">
+                        <option value="new">New</option>
+                        <option value="read">Read</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Response Notes:</label>
+                    <textarea id="contactResponseNotes" placeholder="Add internal notes about this contact submission..."></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="saveContactStatus()">Update Status</button>
+                    <button class="btn btn-danger" onclick="deleteContactSubmission()">Delete</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeContactModal()">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1206,6 +1350,267 @@
         function setupEventListeners() {
             // Prevent form submission on modal open
         }
+
+        // ============================================
+        // TEAM MANAGEMENT FUNCTIONS
+        // ============================================
+        let currentEditingTeamId = null;
+
+        function loadTeam() {
+            fetch(API_BASE + 'crud_team.php?include_inactive=true')
+                .then(r => r.json())
+                .then(d => {
+                    const team = d.data || [];
+                    const tbody = document.querySelector('#teamTable tbody');
+                    tbody.innerHTML = '';
+
+                    team.forEach(member => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${escapeHtml(member.full_name)}</td>
+                                <td>${escapeHtml(member.position)}</td>
+                                <td>${escapeHtml(member.email || '-')}</td>
+                                <td><span style="padding: 5px 10px; border-radius: 3px; background: ${member.is_active ? '#c6f6d5' : '#fed7d7'}; color: ${member.is_active ? '#22543d' : '#742a2a'};">${member.is_active ? 'Active' : 'Inactive'}</span></td>
+                                <td>${member.display_order}</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="editTeam(${member.team_id})">Edit</button>
+                                    <button class="btn btn-danger" onclick="deleteTeam(${member.team_id})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        function openTeamModal() {
+            currentEditingTeamId = null;
+            document.getElementById('teamForm').reset();
+            document.querySelector('#teamForm button[type="submit"]').textContent = 'Add Team Member';
+            document.getElementById('teamModal').classList.add('active');
+        }
+
+        function closeTeamModal() {
+            currentEditingTeamId = null;
+            document.getElementById('teamForm').reset();
+            document.getElementById('teamModal').classList.remove('active');
+        }
+
+        function editTeam(teamId) {
+            fetch(API_BASE + 'crud_team.php?team_id=' + teamId)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.data) {
+                        const member = d.data;
+                        currentEditingTeamId = teamId;
+                        document.getElementById('teamFullName').value = member.full_name;
+                        document.getElementById('teamPosition').value = member.position;
+                        document.getElementById('teamBio').value = member.bio || '';
+                        document.getElementById('teamEmail').value = member.email || '';
+                        document.getElementById('teamPhone').value = member.phone || '';
+                        document.getElementById('teamImageUrl').value = member.image_url || '';
+                        document.getElementById('teamDisplayOrder').value = member.display_order;
+                        document.querySelector('#teamForm button[type="submit"]').textContent = 'Update Team Member';
+                        document.getElementById('teamModal').classList.add('active');
+                    }
+                });
+        }
+
+        function saveTeam(e) {
+            e.preventDefault();
+
+            const data = {
+                full_name: document.getElementById('teamFullName').value,
+                position: document.getElementById('teamPosition').value,
+                bio: document.getElementById('teamBio').value,
+                email: document.getElementById('teamEmail').value,
+                phone: document.getElementById('teamPhone').value,
+                image_url: document.getElementById('teamImageUrl').value,
+                display_order: parseInt(document.getElementById('teamDisplayOrder').value),
+                is_active: 1
+            };
+
+            const method = currentEditingTeamId ? 'PUT' : 'POST';
+            if (currentEditingTeamId) {
+                data.team_id = currentEditingTeamId;
+            }
+
+            fetch(API_BASE + 'crud_team.php', {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(d => {
+                showAlert(d.message || 'Team member saved successfully', 'success');
+                closeTeamModal();
+                loadTeam();
+            })
+            .catch(err => {
+                console.error(err);
+                showAlert('Error saving team member', 'error');
+            });
+        }
+
+        function deleteTeam(teamId) {
+            if (!confirm('Are you sure you want to delete this team member?')) return;
+
+            fetch(API_BASE + 'crud_team.php', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ team_id: teamId })
+            })
+            .then(r => r.json())
+            .then(d => {
+                showAlert(d.message || 'Team member deleted', 'success');
+                loadTeam();
+            })
+            .catch(err => {
+                console.error(err);
+                showAlert('Error deleting team member', 'error');
+            });
+        }
+
+        // ============================================
+        // CONTACT MANAGEMENT FUNCTIONS
+        // ============================================
+        let currentViewingContactId = null;
+
+        function loadContacts() {
+            const status = document.getElementById('contactStatusFilter').value;
+            const url = status ? API_BASE + 'crud_contact.php?status=' + status : API_BASE + 'crud_contact.php';
+
+            fetch(url)
+                .then(r => r.json())
+                .then(d => {
+                    const contacts = d.data || [];
+                    const tbody = document.querySelector('#contactsTable tbody');
+                    tbody.innerHTML = '';
+
+                    contacts.forEach(contact => {
+                        const messagePreview = escapeHtml(contact.message.substring(0, 60)) + (contact.message.length > 60 ? '...' : '');
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${escapeHtml(contact.full_name)}</td>
+                                <td>${escapeHtml(contact.email)}</td>
+                                <td>${messagePreview}</td>
+                                <td><span style="padding: 5px 10px; border-radius: 3px; background: ${contact.status === 'new' ? '#bee3f8' : contact.status === 'read' ? '#c6f6d5' : '#fed7d7'}; color: ${contact.status === 'new' ? '#2c5282' : contact.status === 'read' ? '#22543d' : '#742a2a'};">${contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}</span></td>
+                                <td>${new Date(contact.created_at).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="viewContact(${contact.contact_id})">View</button>
+                                    <button class="btn btn-danger" onclick="quickDeleteContact(${contact.contact_id})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        function viewContact(contactId) {
+            fetch(API_BASE + 'crud_contact.php?contact_id=' + contactId)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.data) {
+                        const contact = d.data;
+                        currentViewingContactId = contactId;
+                        document.getElementById('contactViewName').textContent = contact.full_name;
+                        document.getElementById('contactViewEmail').textContent = contact.email;
+                        document.getElementById('contactViewMessage').textContent = contact.message;
+                        document.getElementById('contactViewDate').textContent = new Date(contact.created_at).toLocaleString();
+                        document.getElementById('contactViewStatus').value = contact.status;
+                        document.getElementById('contactResponseNotes').value = contact.response_notes || '';
+                        document.getElementById('contactModal').classList.add('active');
+
+                        // Mark as read
+                        if (contact.status === 'new') {
+                            fetch(API_BASE + 'crud_contact.php', {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ contact_id: contactId, status: 'read' })
+                            }).then(() => loadContacts());
+                        }
+                    }
+                });
+        }
+
+        function closeContactModal() {
+            currentViewingContactId = null;
+            document.getElementById('contactModal').classList.remove('active');
+        }
+
+        function saveContactStatus() {
+            const data = {
+                contact_id: currentViewingContactId,
+                status: document.getElementById('contactViewStatus').value,
+                response_notes: document.getElementById('contactResponseNotes').value
+            };
+
+            fetch(API_BASE + 'crud_contact.php', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(d => {
+                showAlert(d.message || 'Contact updated', 'success');
+                closeContactModal();
+                loadContacts();
+            })
+            .catch(err => {
+                console.error(err);
+                showAlert('Error updating contact', 'error');
+            });
+        }
+
+        function deleteContactSubmission() {
+            if (!confirm('Are you sure you want to delete this contact submission?')) return;
+
+            fetch(API_BASE + 'crud_contact.php', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contact_id: currentViewingContactId, hard_delete: true })
+            })
+            .then(r => r.json())
+            .then(d => {
+                showAlert(d.message || 'Contact deleted', 'success');
+                closeContactModal();
+                loadContacts();
+            })
+            .catch(err => {
+                console.error(err);
+                showAlert('Error deleting contact', 'error');
+            });
+        }
+
+        function quickDeleteContact(contactId) {
+            if (!confirm('Are you sure you want to delete this contact submission?')) return;
+
+            fetch(API_BASE + 'crud_contact.php', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contact_id: contactId })
+            })
+            .then(r => r.json())
+            .then(d => {
+                showAlert(d.message || 'Contact deleted', 'success');
+                loadContacts();
+            })
+            .catch(err => {
+                console.error(err);
+                showAlert('Error deleting contact', 'error');
+            });
+        }
+
+        // Update switchView to handle new views
+        const originalSwitchView = switchView;
+        switchView = function(view) {
+            originalSwitchView(view);
+            if (view === 'team') loadTeam();
+            if (view === 'contacts') loadContacts();
+        };
     </script>
 </body>
 </html>
