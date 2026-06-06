@@ -1,4 +1,24 @@
-<?php\n/**\n * init.php - Data Initialization Script\n * \n * This script runs on first page load to initialize the application's data.\n * It creates default events and sets up empty JSON data files for:\n * - Event registrations\n * - User comments on events\n * - Event reminders\n * \n * Features:\n * - Creates 3 default sample events (Photo Walk, Editing Workshop, Photography Competition)\n * - Initializes empty data files if they don't exist\n * - Ensures proper data structure for the event management system\n */\n\nrequire_once __DIR__ . '/config.php';\n\n// ==================== INITIALIZE DEFAULT EVENTS ====================\n// Create default events only if events file doesn't exist\nif (!file_exists(EVENTS_FILE)) {\n    // Initialize array with three sample events\n    $events = [
+<?php
+/**
+ * init.php - Data Initialization Script
+ *
+ * This script runs on first page load to initialize the application's data.
+ * It creates default events and sets up empty JSON data files for:
+ * - Event registrations
+ * - User comments on events
+ * - Event reminders
+ *
+ * Features:
+ * - Creates 3 default sample events (Photo Walk, Editing Workshop, Photography Competition)
+ * - Initializes empty data files if they don't exist
+ * - Ensures proper data structure for the event management system
+ */
+require_once __DIR__ . '/config.php';
+// ==================== INITIALIZE DEFAULT EVENTS ====================
+// Create default events only if events file doesn't exist
+if (!file_exists(EVENTS_FILE)) {
+    // Initialize array with three sample events
+    $events = [
         [
             'id' => 'event_001',
             'title' => 'Photo Walk',
@@ -87,7 +107,6 @@
     save_json(EVENTS_FILE, $events);
 }
 
-// ==================== INITIALIZE EMPTY DATA FILES ====================
 // Create empty registrations file if it doesn't exist
 if (!file_exists(REGISTRATIONS_FILE)) {
     save_json(REGISTRATIONS_FILE, []);

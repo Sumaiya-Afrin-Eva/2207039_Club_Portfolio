@@ -142,66 +142,45 @@ if ($action === 'register' && $method === 'POST') {
         respond('error', 'Event is full');
     }
     
-    // Create user if doesn't exist, or get existing user
-    $user = db_fetch_one(
-        "SELECT user_id FROM users WHERE email = ?",
-        [$input['email']]
+    // Check if already registered for this event
+    $existing = db_fetch_one(
+        "SELECT registration_id FROM registrations WHERE event_id = ? AND email = ?",
+        [$event_id, $input['email']]
     );
     
-    $user_id = null;
-    if ($user) {
-        $user_id = (int)$user['user_id'];
-        log_error("Registration: Using existing user - user_id=$user_id");
-        
-        // Check if user already registered for this event
-        $existing = db_fetch_one(
-            "SELECT registration_id FROM registrations WHERE event_id = ? AND user_id = ?",
-            [$event_id, $user_id]
-        );
-        
-        if ($existing) {
-            log_error("Registration: Already registered - email=" . $input['email']);
-            respond('error', 'Already registered for this event');
-        }
+    if ($existing) {
+        log_error("Registration: Already registered - email=" . $input['email']);
+        respond('error', 'Already registered for this event');
     }
     
-    if (!$user) {
-        // Create guest user - cast to proper types
-        log_error("Registration: Creating new user - email=" . $input['email']);
-        $user_query = "INSERT INTO users (email, full_name, phone, password, role, is_active) VALUES (?, ?, ?, '', 'member', 1)";
-        $user_id = db_insert($user_query, [
-            $input['email'],
-            $input['name'],
-            $input['phone']
-        ]);
-        
-        if (!$user_id) {
-            log_error("Registration: Failed to create user - email=" . $input['email']);
-            respond('error', 'Failed to create user account');
-        }
-        log_error("Registration: User created with id=$user_id");
-    }
-    
-    // Create registration - ensure types are correct
-    log_error("Registration: Creating registration for user_id=$user_id, event_id=$event_id");
-    $reg_query = "INSERT INTO registrations (event_id, user_id, status) VALUES (?, ?, 'registered')";
-    $registration_id = db_insert($reg_query, [
+    // Store registration data
+    log_error("Registration: Creating registration record - email=" . $input['email']);
+    $registration_query = "INSERT INTO registrations (event_id, name, email, phone, address, institute, academic_year, gender, experience) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $registration_id = db_insert($registration_query, [
         $event_id,
-        $user_id
+        $input['name'],
+        $input['email'],
+        $input['phone'],
+        $input['address'],
+        $input['institute'],
+        $input['academic_year'],
+        $input['gender'],
+        $input['experience']
     ]);
     
-    if ($registration_id) {
-        log_error("Registration: Success - registration_id=$registration_id");
-        respond('success', 'Successfully registered!', [
-            'registration_id' => $registration_id,
-            'event_id' => $event_id,
-            'email' => $input['email'],
-            'name' => $input['name']
-        ]);
-    } else {
-        log_error("Registration: Failed to create registration record");
-        respond('error', 'Failed to create registration record');
+    if (!$registration_id) {
+        log_error("Registration: Failed to create registration record - email=" . $input['email']);
+        respond('error', 'Failed to register for this event');
     }
+    
+    log_error("Registration: Successfully registered with id=$registration_id");
+    respond('success', 'Successfully registered!', [
+        'registration_id' => $registration_id,
+        'event_id' => $event_id,
+        'email' => $input['email'],
+        'name' => $input['name']
+    ]);
 }
 
 
@@ -245,45 +224,32 @@ if ($action === 'add_comment' && $method === 'POST') {
     
     log_error("Comment: Processing for event - " . $event['title']);
     
-    // Get or create user
-    $user = db_fetch_one(
-        "SELECT user_id FROM users WHERE full_name = ?",
-        [$input['name']]
-    );
+    // Store comment without creating user - store name and email directly
+    $full_name = $input['name'];
+    $email = $input['email'] ?? null;
+    $rating = $input['rating'] ?? null;
     
-    if (!$user) {
-        // Create guest user - include password field
-        log_error("Comment: Creating guest user - name=" . $input['name']);
-        $user_query = "INSERT INTO users (email, full_name, password, role, is_active) VALUES (NULL, ?, '', 'member', 1)";
-        $user_id = db_insert($user_query, [$input['name']]);
-        
-        if (!$user_id) {
-            log_error("Comment: Failed to create user - name=" . $input['name']);
-            respond('error', 'Failed to create user account');
-        }
-        log_error("Comment: User created with id=$user_id");
-    } else {
-        $user_id = (int)$user['user_id'];
-        log_error("Comment: Using existing user - user_id=$user_id");
+    // Validate rating if provided
+    if ($rating && ($rating < 1 || $rating > 5)) {
+        respond('error', 'Rating must be between 1 and 5');
     }
     
-    // Create comment
-    log_error("Comment: Creating comment for user_id=$user_id, event_id=$event_id");
-    $comment_query = "INSERT INTO comments (event_id, user_id, comment_text) VALUES (?, ?, ?)";
-    $comment_id = db_insert($comment_query, [$event_id, $user_id, $input['comment']]);
+    log_error("Comment: Creating comment for name=$full_name, event_id=$event_id");
+    $comment_query = "INSERT INTO comments (event_id, full_name, email, comment_text, rating) VALUES (?, ?, ?, ?, ?)";
+    $comment_id = db_insert($comment_query, [$event_id, $full_name, $email, $input['comment'], $rating]);
     
     if ($comment_id) {
         log_error("Comment: Success - comment_id=$comment_id");
         respond('success', 'Comment added', [
             'comment_id' => $comment_id,
             'event_id' => $event_id,
-            'name' => $input['name'],
+            'name' => $full_name,
             'comment' => $input['comment']
         ]);
     } else {
         log_error("Comment: Failed to create comment record");
+        respond('error', 'Failed to add comment');
     }
-    respond('error', 'Failed to add comment');
 }
 
 
@@ -298,8 +264,7 @@ if ($action === 'get_comments' && $method === 'GET') {
     if (!$event_id) respond('error', 'Event ID required');
     
     $comments = db_select(
-        "SELECT c.*, u.full_name as name FROM comments c
-         LEFT JOIN users u ON c.user_id = u.user_id
+        "SELECT c.* FROM comments c
          WHERE c.event_id = ?
          ORDER BY c.created_at DESC",
         [$event_id]
@@ -311,7 +276,7 @@ if ($action === 'get_comments' && $method === 'GET') {
             'id' => $c['comment_id'],
             'comment_id' => $c['comment_id'],
             'event_id' => $c['event_id'],
-            'name' => $c['name'] ?? 'Anonymous',
+            'name' => $c['full_name'] ?? 'Anonymous',
             'comment' => $c['comment_text'],
             'created_at' => $c['created_at']
         ];
@@ -335,53 +300,58 @@ if ($action === 'get_comments' && $method === 'GET') {
 if ($action === 'set_reminder' && $method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     
-    // Validate required parameters
+    // Validate required parameters (email is required, name is optional)
     if (empty($input['event_id']) || empty($input['email'])) {
-        respond('error', 'Event ID and email required');
+        respond('error', 'Event ID and email are required');
+    }
+    
+    // Validate email format
+    if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
+        respond('error', 'Invalid email format');
     }
     
     // Check if event exists
     $event = get_event_by_id($input['event_id']);
     if (!$event) respond('error', 'Event not found');
     
-    // Get or create user
-    $user = db_fetch_one(
-        "SELECT user_id FROM users WHERE email = ?",
-        [$input['email']]
-    );
-    
-    if (!$user) {
-        $user_query = "INSERT INTO users (email, role, is_active) VALUES (?, 'member', 1)";
-        $user_id = db_insert($user_query, [$input['email']]);
-    } else {
-        $user_id = $user['user_id'];
+    try {
+        $conn = get_db_connection();
+        
+        // Check if reminder already exists for this event and email
+        $existing = db_fetch_one(
+            "SELECT reminder_id FROM reminders WHERE event_id = ? AND email = ?",
+            [$input['event_id'], $input['email']]
+        );
+        
+        if ($existing) {
+            respond('error', 'You\'ve already set a reminder for this event. We\'ll send you a notification 24 hours before it starts.');
+        }
+        
+        // Set reminder for 1 day before the event
+        $event_date = $event['event_date'];
+        $reminder_time = date('Y-m-d H:i:s', strtotime($event_date) - (24 * 3600));
+        
+        // Use provided name or default to "Guest" if not provided
+        $full_name = !empty($input['name']) ? $input['name'] : 'Guest';
+        
+        // Store reminder without creating user - store name and email directly
+        $reminder_query = "INSERT INTO reminders (event_id, full_name, email, reminder_time) VALUES (?, ?, ?, ?)";
+        $reminder_id = db_insert($reminder_query, [$input['event_id'], $full_name, $input['email'], $reminder_time]);
+        
+        if ($reminder_id) {
+            respond('success', 'Reminder set successfully', [
+                'reminder_id' => $reminder_id,
+                'event_id' => $input['event_id'],
+                'email' => $input['email'],
+                'reminder_time' => $reminder_time
+            ]);
+        } else {
+            respond('error', 'Failed to set reminder');
+        }
+    } catch (Exception $e) {
+        log_error("Reminder creation error: " . $e->getMessage());
+        respond('error', 'Error setting reminder');
     }
-    
-    // Check if reminder already exists
-    $existing = db_fetch_one(
-        "SELECT reminder_id FROM reminders WHERE event_id = ? AND user_id = ?",
-        [$input['event_id'], $user_id]
-    );
-    
-    if ($existing) {
-        respond('error', 'Reminder already set for this event');
-    }
-    
-    // Set reminder for 1 day before the event
-    $event_date = strtotime($event['event_date']);
-    $reminder_time = date('Y-m-d H:i:s', $event_date - (24 * 3600));
-    
-    $reminder_query = "INSERT INTO reminders (event_id, user_id, reminder_time) VALUES (?, ?, ?)";
-    $reminder_id = db_insert($reminder_query, [$input['event_id'], $user_id, $reminder_time]);
-    
-    if ($reminder_id) {
-        respond('success', 'Reminder set successfully', [
-            'reminder_id' => $reminder_id,
-            'event_id' => $input['event_id'],
-            'email' => $input['email']
-        ]);
-    }
-    respond('error', 'Failed to set reminder');
 }
 
 

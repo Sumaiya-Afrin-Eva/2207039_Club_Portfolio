@@ -66,10 +66,15 @@ if ($action === 'create' && $method === 'POST') {
 
 // ==================== UPDATE USER ====================
 if ($action === 'update' && $method === 'POST') {
-    $data = json_decode(file_get_contents("php://input"), true);
-    $user_id = $data['user_id'] ?? null;
-    
+    $user_id = $_GET['user_id'] ?? null;
     if (!$user_id) respond('error', 'User ID required');
+    
+    $data = json_decode(file_get_contents("php://input"), true);
+    
+    // Validate email if provided
+    if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        respond('error', 'Invalid email format');
+    }
     
     if (update_user_profile($user_id, $data)) {
         $user = get_user_by_id($user_id);
@@ -77,6 +82,18 @@ if ($action === 'update' && $method === 'POST') {
         respond('success', 'User updated successfully', $user);
     } else {
         respond('error', 'Failed to update user');
+    }
+}
+
+// ==================== DELETE USER ====================
+if ($action === 'delete' && ($method === 'DELETE' || $method === 'POST')) {
+    $user_id = $_GET['user_id'] ?? null;
+    if (!$user_id) respond('error', 'User ID required');
+    
+    if (delete_user($user_id)) {
+        respond('success', 'User deleted successfully');
+    } else {
+        respond('error', 'Failed to delete user');
     }
 }
 

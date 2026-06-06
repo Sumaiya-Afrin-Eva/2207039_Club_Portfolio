@@ -12,6 +12,7 @@
 
 require_once __DIR__ . '/db_config.php';
 require_once __DIR__ . '/db_functions.php';
+require_once __DIR__ . '/auth.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -87,6 +88,13 @@ function handle_get_team($db) {
  * Handle POST requests - Create new team member
  */
 function handle_post_team($db) {
+    // Require admin access
+    if (!is_admin_logged_in()) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Admin access required']);
+        return;
+    }
+    
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (!isset($data['full_name']) || !isset($data['position'])) {
@@ -109,9 +117,12 @@ function handle_post_team($db) {
     
     $params = [$full_name, $position, $bio, $image_url, $email, $phone, $display_order, $is_active];
     
-    if (db_insert($query, $params)) {
+    $team_id = db_insert($query, $params);
+    if ($team_id) {
+        // Log audit action
+        log_audit_action('CREATE', 'team_members', $team_id, null, $data);
         http_response_code(201);
-        echo json_encode(['message' => 'Team member created successfully', 'team_id' => $db->insert_id]);
+        echo json_encode(['message' => 'Team member created successfully', 'team_id' => $team_id]);
     } else {
         http_response_code(500);
         echo json_encode(['error' => 'Failed to create team member']);
@@ -122,6 +133,13 @@ function handle_post_team($db) {
  * Handle PUT requests - Update team member
  */
 function handle_put_team($db) {
+    // Require admin access
+    if (!is_admin_logged_in()) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Admin access required']);
+        return;
+    }
+    
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (!isset($data['team_id'])) {
@@ -133,6 +151,15 @@ function handle_put_team($db) {
     $team_id = $data['team_id'];
     $updates = [];
     $params = [];
+    
+    // Get old values BEFORE updating
+    $old_query = "SELECT * FROM team_members WHERE team_id = ?";
+    $old_data = db_fetch_one($old_query, [$team_id]);
+    if (!$old_data) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Team member not found']);
+        return;
+    }
 
     // Build dynamic update query
     if (isset($data['full_name'])) {
@@ -178,6 +205,8 @@ function handle_put_team($db) {
     $query = "UPDATE team_members SET " . implode(", ", $updates) . " WHERE team_id = ?";
 
     if (db_execute($query, $params)) {
+        // Log audit action with old and new values
+        log_audit_action('UPDATE', 'team_members', $team_id, $old_data, $data);
         http_response_code(200);
         echo json_encode(['message' => 'Team member updated successfully']);
     } else {
@@ -190,6 +219,13 @@ function handle_put_team($db) {
  * Handle DELETE requests - Archive or delete team member
  */
 function handle_delete_team($db) {
+    // Require admin access
+    if (!is_admin_logged_in()) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Admin access required']);
+        return;
+    }
+    
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (!isset($data['team_id'])) {
@@ -200,6 +236,15 @@ function handle_delete_team($db) {
 
     $team_id = $data['team_id'];
     $hard_delete = $data['hard_delete'] ?? false;
+    
+    // Get old values BEFORE deleting
+    $old_query = "SELECT * FROM team_members WHERE team_id = ?";
+    $old_data = db_fetch_one($old_query, [$team_id]);
+    if (!$old_data) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Team member not found']);
+        return;
+    }
 
     if ($hard_delete) {
         // Hard delete
@@ -210,6 +255,11 @@ function handle_delete_team($db) {
     }
 
     if (db_execute($query, [$team_id])) {
+        // Get deleted record for audit log
+        $delete_query = "SELECT * FROM team_members WHERE team_id = ?";
+        $old_data = db_fetch_one($delete_query, [$team_id]);
+        // Log audit action
+        log_audit_action('DELETE', 'team_members', $team_id, $old_data, null);
         http_response_code(200);
         echo json_encode(['message' => 'Team member deleted successfully']);
     } else {

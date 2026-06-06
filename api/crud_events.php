@@ -102,11 +102,7 @@ if ($action === 'create' && $method === 'POST') {
         add_event_equipment($event_id, $data['required_equipment']);
     }
     
-    // Log admin action
-    $conn = get_db_connection();
-    $log_query = "INSERT INTO audit_log (admin_id, action, table_name, record_id, new_values)
-                  VALUES (?, 'CREATE', 'events', ?, ?)";
-    db_execute($log_query, [$_SESSION['user_id'], $event_id, json_encode($data)]);
+    // Audit logging is handled in create_event() function in db_functions.php
     
     send_response('success', 'Event created successfully', ['event_id' => $event_id]);
 }
@@ -119,12 +115,6 @@ if ($action === 'update' && $method === 'PUT') {
     $event_id = $_GET['id'] ?? null;
     if (!$event_id) {
         send_response('error', 'Event ID required');
-    }
-    
-    // Get existing event for audit log
-    $old_event = get_event_by_id($event_id);
-    if (!$old_event) {
-        send_response('error', 'Event not found');
     }
     
     $data = json_decode(file_get_contents('php://input'), true);
@@ -142,12 +132,7 @@ if ($action === 'update' && $method === 'PUT') {
             add_event_equipment($event_id, $data['required_equipment']);
         }
         
-        // Log admin action
-        db_execute(
-            "INSERT INTO audit_log (admin_id, action, table_name, record_id, old_values, new_values)
-             VALUES (?, 'UPDATE', 'events', ?, ?, ?)",
-            [$_SESSION['user_id'], $event_id, json_encode($old_event), json_encode($data)]
-        );
+        // Audit logging is handled in update_event() function in db_functions.php
         
         send_response('success', 'Event updated successfully');
     } else {
@@ -165,19 +150,8 @@ if ($action === 'delete' && $method === 'DELETE') {
         send_response('error', 'Event ID required');
     }
     
-    // Get event for audit log
-    $event = get_event_by_id($event_id);
-    if (!$event) {
-        send_response('error', 'Event not found');
-    }
-    
     if (delete_event($event_id)) {
-        // Log admin action
-        db_execute(
-            "INSERT INTO audit_log (admin_id, action, table_name, record_id, old_values)
-             VALUES (?, 'DELETE', 'events', ?, ?)",
-            [$_SESSION['user_id'], $event_id, json_encode($event)]
-        );
+        // Audit logging is handled in delete_event() function in db_functions.php
         
         send_response('success', 'Event deleted successfully');
     } else {

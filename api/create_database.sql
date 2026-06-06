@@ -75,20 +75,27 @@ CREATE TABLE IF NOT EXISTS `event_equipment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ====================================================
--- 5. REGISTRATIONS TABLE - Store user event registrations
+-- 5. REGISTRATIONS TABLE - Store event registrations
+-- Consolidated table for all event registrations (both users and guests)
 -- ====================================================
 CREATE TABLE IF NOT EXISTS `registrations` (
   `registration_id` INT AUTO_INCREMENT PRIMARY KEY,
   `event_id` INT NOT NULL,
-  `user_id` INT NOT NULL,
-  `status` ENUM('registered', 'attended', 'cancelled') DEFAULT 'registered',
+  `name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `phone` VARCHAR(20),
+  `address` TEXT,
+  `institute` VARCHAR(255),
+  `academic_year` VARCHAR(50),
+  `gender` VARCHAR(20),
+  `experience` VARCHAR(255),
   `registration_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE,
-  UNIQUE KEY `unique_registration` (`event_id`, `user_id`),
-  INDEX `idx_user` (`user_id`),
-  INDEX `idx_status` (`status`)
+  UNIQUE KEY `unique_event_registration` (`event_id`, `email`),
+  INDEX `idx_event` (`event_id`),
+  INDEX `idx_email` (`email`),
+  INDEX `idx_registration_date` (`registration_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ====================================================
@@ -97,15 +104,15 @@ CREATE TABLE IF NOT EXISTS `registrations` (
 CREATE TABLE IF NOT EXISTS `comments` (
   `comment_id` INT AUTO_INCREMENT PRIMARY KEY,
   `event_id` INT NOT NULL,
-  `user_id` INT NOT NULL,
+  `full_name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255),
   `comment_text` TEXT,
   `rating` INT CHECK (rating >= 1 AND rating <= 5),
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE,
   INDEX `idx_event` (`event_id`),
-  INDEX `idx_user` (`user_id`)
+  INDEX `idx_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ====================================================
@@ -114,15 +121,15 @@ CREATE TABLE IF NOT EXISTS `comments` (
 CREATE TABLE IF NOT EXISTS `reminders` (
   `reminder_id` INT AUTO_INCREMENT PRIMARY KEY,
   `event_id` INT NOT NULL,
-  `user_id` INT NOT NULL,
+  `full_name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
   `reminder_time` DATETIME NOT NULL,
   `is_sent` BOOLEAN DEFAULT 0,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `sent_at` TIMESTAMP NULL,
   FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE,
   INDEX `idx_event` (`event_id`),
-  INDEX `idx_user` (`user_id`),
+  INDEX `idx_email` (`email`),
   INDEX `idx_reminder_time` (`reminder_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -144,6 +151,43 @@ CREATE TABLE IF NOT EXISTS `audit_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ====================================================
+-- 9. TEAM_MEMBERS TABLE - Store team member information
+-- ====================================================
+CREATE TABLE IF NOT EXISTS `team_members` (
+  `team_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `full_name` VARCHAR(255) NOT NULL,
+  `position` VARCHAR(255) NOT NULL,
+  `bio` TEXT,
+  `image_url` VARCHAR(500),
+  `email` VARCHAR(255),
+  `phone` VARCHAR(20),
+  `is_active` BOOLEAN DEFAULT 1,
+  `display_order` INT DEFAULT 0,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_display_order` (`display_order`),
+  INDEX `idx_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ====================================================
+-- 10. CONTACT_SUBMISSIONS TABLE - Store contact form submissions
+-- ====================================================
+CREATE TABLE IF NOT EXISTS `contact_submissions` (
+  `contact_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `full_name` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `message` TEXT NOT NULL,
+  `status` ENUM('new', 'read', 'archived') DEFAULT 'new',
+  `response_notes` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_status` (`status`),
+  INDEX `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+-- ====================================================
 -- INSERT DEFAULT ADMIN USER
 -- Default credentials: email: admin@clubportfolio.com, password: Admin@123
 -- IMPORTANT: Change password after first login!
@@ -156,3 +200,12 @@ VALUES (
   'admin',
   1
 ) ON DUPLICATE KEY UPDATE `email` = `email`;
+
+-- ====================================================
+-- INSERT DEFAULT TEAM MEMBERS
+-- ====================================================
+INSERT INTO `team_members` (`full_name`, `position`, `bio`, `display_order`, `is_active`)
+VALUES 
+  ('Sanjida Afrin Shikha', 'President', 'Leading the Photography & Media Club with vision and creativity', 1, 1),
+  ('Sumaiya Afrin Eva', 'Creative Lead', 'Driving innovative creative projects and member engagement', 2, 1)
+ON DUPLICATE KEY UPDATE `full_name` = VALUES(`full_name`);

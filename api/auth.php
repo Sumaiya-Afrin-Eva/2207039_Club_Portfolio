@@ -8,6 +8,18 @@
 require_once __DIR__ . '/db_config.php';
 require_once __DIR__ . '/db_functions.php';
 
+// Configure session cookie settings BEFORE session_start()
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.cookie_httponly', '0');  // Allow JavaScript access if needed
+ini_set('session.cookie_lifetime', '0');  // Session cookie (expires when browser closes)
+
+// Set cache prevention headers for all auth endpoints
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+header('Content-Type: application/json');
+
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -36,6 +48,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
         $_SESSION['full_name'] = $user['full_name'];
         $_SESSION['role'] = $user['role'];
         
+        // Log login action to audit_log
+        $conn = get_db_connection();
+        $log_query = "INSERT INTO audit_log (admin_id, action, table_name, new_values)
+                      VALUES (?, 'LOGIN', 'users', ?)";
+        $stmt = $conn->prepare($log_query);
+        if ($stmt) {
+            $user_id = $user['user_id'];
+            $login_data = json_encode(['email' => $user['email'], 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
+            $stmt->bind_param('is', $user_id, $login_data);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
         // Remove password from response
         unset($user['password']);
         
@@ -52,7 +77,44 @@ if (isset($_GET['action']) && $_GET['action'] === 'login' && $_SERVER['REQUEST_M
  * Usage: GET /api/auth.php?action=logout
  */
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    // Get user ID before clearing session
+    $user_id = $_SESSION['user_id'] ?? null;
+    
+    // Log logout action to audit_log
+    if ($user_id) {
+        $conn = get_db_connection();
+        $log_query = "INSERT INTO audit_log (admin_id, action, table_name, new_values)
+                      VALUES (?, 'LOGOUT', 'users', ?)";
+        $stmt = $conn->prepare($log_query);
+        if ($stmt) {
+            $logout_data = json_encode(['ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
+            $stmt->bind_param('is', $user_id, $logout_data);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+    
+    // Clear all session variables
+    $_SESSION = array();
+    
+    // Delete the session cookie
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+    
+    // Destroy the session
     session_destroy();
+    
+    // Set cache prevention headers
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Cache-Control: post-check=0, pre-check=0', false);
+    header('Pragma: no-cache');
+    header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+    
     respond('success', 'Logged out successfully');
 }
 

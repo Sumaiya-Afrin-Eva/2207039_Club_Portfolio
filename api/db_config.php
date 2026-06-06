@@ -8,9 +8,11 @@
  * Database Credentials (Update these with your MySQL settings)
  */
 
-// Enable error reporting for development
+// Enable error reporting but don't display errors (log them instead to avoid breaking JSON)
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/error.log');
 
 // ==================== DATABASE CONFIGURATION ====================
 // MySQL connection credentials - CHANGE THESE AS NEEDED
@@ -66,9 +68,18 @@ function db_select($query, $params = []) {
         return [];
     }
     
-    // Bind parameters if provided
+    // Bind parameters with proper type detection
     if (!empty($params)) {
-        $types = str_repeat('s', count($params));
+        $types = '';
+        foreach ($params as $param) {
+            if (is_int($param)) {
+                $types .= 'i';
+            } elseif (is_float($param)) {
+                $types .= 'd';
+            } else {
+                $types .= 's';
+            }
+        }
         $stmt->bind_param($types, ...$params);
     }
     
@@ -105,9 +116,18 @@ function db_insert($query, $params = []) {
         return false;
     }
     
-    // Bind parameters
+    // Bind parameters with proper type detection
     if (!empty($params)) {
-        $types = str_repeat('s', count($params));
+        $types = '';
+        foreach ($params as $param) {
+            if (is_int($param)) {
+                $types .= 'i';
+            } elseif (is_float($param)) {
+                $types .= 'd';
+            } else {
+                $types .= 's';
+            }
+        }
         $stmt->bind_param($types, ...$params);
     }
     
@@ -139,9 +159,18 @@ function db_execute($query, $params = []) {
         return false;
     }
     
-    // Bind parameters
+    // Bind parameters with proper type detection
     if (!empty($params)) {
-        $types = str_repeat('s', count($params));
+        $types = '';
+        foreach ($params as $param) {
+            if (is_int($param)) {
+                $types .= 'i';
+            } elseif (is_float($param)) {
+                $types .= 'd';
+            } else {
+                $types .= 's';
+            }
+        }
         $stmt->bind_param($types, ...$params);
     }
     

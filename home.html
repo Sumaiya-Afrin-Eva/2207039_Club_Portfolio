@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Photography & Media Club</title>
 
     <link
@@ -10,10 +13,13 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="home.css?v=999" />
   </head>
 
   <body>
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
     <header>
       <h1>PhotoClub</h1>
       <nav>
@@ -23,6 +29,13 @@
         <a href="#events">Events</a>
         <a href="#members">Members</a>
         <a href="#contact">Contact</a>
+        <span id="userAuthSection" style="margin-left: auto;">
+          <button id="loginBtn" class="btn btn-login" onclick="openLoginForm()" style="padding: 8px 16px; margin: 0 10px;">Login</button>
+          <span id="userInfoDisplay" style="display: none; color: #fff; margin-right: 15px;">
+            Welcome <strong id="userNameDisplay"></strong>
+            <button class="btn btn-logout" onclick="logoutUser()" style="padding: 5px 12px; margin-left: 10px;">Logout</button>
+          </span>
+        </span>
       </nav>
     </header>
 
@@ -88,28 +101,21 @@
       <div class="cards" id="pastEventsContainer"></div>
     </section>
 
+    <!-- Team Section -->
     <section id="members">
       <h2>Our Team</h2>
-      <div class="team">
-        <div class="member">
-          <h4>Sanjida Afrin Shikha</h4>
-          <p>President</p>
-        </div>
-        <div class="member">
-          <h4>Sumaiya Afrin Eva</h4>
-          <p>Creative Lead</p>
-        </div>
-      </div>
+      <div class="team" id="teamContainer"></div>
     </section>
 
     <section id="contact">
       <h2>Contact Us</h2>
       <form class="contact-form" id="contactForm">
-        <input type="text" placeholder="Your Name" required />
-        <input type="email" placeholder="Your Email" required />
-        <textarea placeholder="Your Message" rows="4"></textarea>
-        <button class="btn">Send Message</button>
+        <input type="text" id="contactName" placeholder="Your Name" required />
+        <input type="email" id="contactEmail" placeholder="Your Email" required />
+        <textarea id="contactMessageText" placeholder="Your Message" rows="4" required></textarea>
+        <button type="submit" class="btn">Send Message</button>
       </form>
+      <div id="contactStatusMessage" style="margin-top: 15px; display: none;"></div>
     </section>
 
     <div id="fullGalleryPage" class="full-gallery-page" style="display:none;">
@@ -239,6 +245,7 @@
             
             <div class="comment-form">
               <input type="text" id="commentName" placeholder="Your Name" />
+              <input type="email" id="commentEmail" placeholder="Your Email (optional)" />
               <textarea id="commentText" placeholder="Ask a question or leave a comment..."></textarea>
               <button class="btn btn-small" onclick="submitComment()">Post Comment</button>
             </div>
@@ -248,7 +255,43 @@
 
           <!-- Reminder Section -->
           <div class="event-section reminder-section">
-            <button class="btn btn-outline" id="reminderBtn" onclick="setReminder()">🔔 Remind Me</button>
+            <div class="reminder-header">
+              <h3>🔔 Get Event Reminder</h3>
+              <p class="reminder-subtitle">We'll send you a notification 24 hours before the event</p>
+            </div>
+            
+            <form id="inlineReminderForm" class="inline-reminder-form" novalidate>
+              <div class="reminder-form-group">
+                <label for="inlineReminderName">
+                  <span class="label-text">Your Full Name</span>
+                  <span class="optional-hint">(optional)</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="inlineReminderName" 
+                  name="name" 
+                  placeholder="e.g., John Doe (optional)" 
+                  autocomplete="name"
+                />
+              </div>
+
+              <div class="reminder-form-group">
+                <label for="inlineReminderEmail">
+                  <span class="label-text">Email Address</span>
+                  <span class="required-asterisk">*</span>
+                </label>
+                <input 
+                  type="email" 
+                  id="inlineReminderEmail" 
+                  name="email" 
+                  placeholder="e.g., john@example.com" 
+                  autocomplete="email"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary">✓ Set Reminder</button>
+            </form>
           </div>
         </div>
       </div>
@@ -347,10 +390,33 @@
       </div>
     </div>
 
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: none;">
+      <div class="modal-content login-modal">
+        <button class="modal-close" onclick="closeLoginForm()">&times;</button>
+        <h2>Login to Your Account</h2>
+        <form id="loginForm" onsubmit="submitLogin(event)">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" name="password" required />
+          </div>
+          <div id="loginErrorMessage" style="color: #d32f2f; margin-bottom: 15px; display: none;"></div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+        </form>
+        <p style="text-align: center; margin-top: 15px; font-size: 14px;">
+          Don't have an account? <a href="#" onclick="showSignupInfo()">Contact admin to create an account</a>
+        </p>
+      </div>
+    </div>
+
     <footer>
       <p>© 2026 Photography & Media Club | All Rights Reserved</p>
     </footer>
-    <script src="home.js?v=1"></script>
-    <script src="home-events.js?v=2"></script>
+    <script src="home.js?v=999"></script>
+    <script src="home-events.js?v=999"></script>
   </body>
 </html>

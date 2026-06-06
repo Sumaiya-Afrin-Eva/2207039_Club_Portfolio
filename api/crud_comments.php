@@ -106,7 +106,7 @@ if ($action === 'delete_comment' && $method === 'DELETE') {
     
     // Verify user owns this comment (or is admin)
     $conn = get_db_connection();
-    $stmt = $conn->prepare("SELECT user_id FROM comments WHERE comment_id = ?");
+    $stmt = $conn->prepare("SELECT * FROM comments WHERE comment_id = ?");
     $stmt->bind_param("i", $comment_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -122,6 +122,10 @@ if ($action === 'delete_comment' && $method === 'DELETE') {
     }
     
     if (delete_comment($comment_id)) {
+        // Log audit action if admin is deleting
+        if (is_admin_logged_in()) {
+            log_audit_action('DELETE', 'comments', $comment_id, $comment, null);
+        }
         send_response('success', 'Comment deleted successfully');
     } else {
         send_response('error', 'Failed to delete comment');
@@ -160,18 +164,116 @@ if ($action === 'add_reminder' && $method === 'POST') {
 if ($action === 'reminders' && $method === 'GET') {
     require_login();
     
-    $user_id = $_SESSION['user_id'];
+    // Check if admin is requesting all reminders
+    if (is_admin_logged_in()) {
+        // Admin view: fetch all reminders
+        $status_filter = $_GET['status'] ?? null;
+        
+        if ($status_filter === 'pending') {
+            $reminders = db_select(
+                "SELECT r.*, e.title as event_title, e.event_date, e.start_time
+                 FROM reminders r
+                 LEFT JOIN events e ON r.event_id = e.event_id
+                 WHERE r.is_sent = 0
+                 ORDER BY r.reminder_time ASC"
+            );
+        } elseif ($status_filter === 'sent') {
+            $reminders = db_select(
+                "SELECT r.*, e.title as event_title, e.event_date, e.start_time
+                 FROM reminders r
+                 LEFT JOIN events e ON r.event_id = e.event_id
+                 WHERE r.is_sent = 1
+                 ORDER BY r.reminder_time ASC"
+            );
+        } else {
+            $reminders = db_select(
+                "SELECT r.*, e.title as event_title, e.event_date, e.start_time
+                 FROM reminders r
+                 LEFT JOIN events e ON r.event_id = e.event_id
+                 ORDER BY r.reminder_time DESC"
+            );
+        }
+    } else {
+        // User view: fetch only reminders for their email
+        $user_email = $_SESSION['email'] ?? null;
+        
+        if ($user_email) {
+            $reminders = db_select(
+                "SELECT r.*, e.title as event_title, e.event_date, e.start_time
+                 FROM reminders r
+                 LEFT JOIN events e ON r.event_id = e.event_id
+                 WHERE r.email = ?
+                 ORDER BY r.reminder_time ASC",
+                [$user_email]
+            );
+        } else {
+            $reminders = [];
+        }
+    }
     
-    $reminders = db_select(
+    send_response('success', 'Reminders retrieved', $reminders);
+}
+
+// ==================== GET SPECIFIC REMINDER ====================
+if ($action === 'get_reminder' && $method === 'GET') {
+    require_admin_access();
+    
+    $reminder_id = $_GET['reminder_id'] ?? null;
+    if (!$reminder_id) send_response('error', 'Reminder ID required');
+    
+    $reminder = db_fetch_one(
         "SELECT r.*, e.title as event_title, e.event_date, e.start_time
          FROM reminders r
          LEFT JOIN events e ON r.event_id = e.event_id
-         WHERE r.user_id = ?
-         ORDER BY r.reminder_time ASC",
-        [$user_id]
+         WHERE r.reminder_id = ?",
+        [$reminder_id]
     );
     
-    send_response('success', 'Reminders retrieved', $reminders);
+    if ($reminder) {
+        send_response('success', 'Reminder retrieved', $reminder);
+    } else {
+        send_response('error', 'Reminder not found');
+    }
+}
+
+// ==================== DELETE REMINDER (ADMIN) ====================
+if ($action === 'delete_reminder' && $method === 'DELETE') {
+    require_admin_access();
+    
+    $data = json_decode(file_get_contents('php://input'), true);
+    $reminder_id = $data['reminder_id'] ?? null;
+    
+    if (!$reminder_id) send_response('error', 'Reminder ID required');
+    
+    $conn = get_db_connection();
+    
+    // Get reminder data before deletion for audit log
+    $stmt = $conn->prepare("SELECT * FROM reminders WHERE reminder_id = ?");
+    $stmt->bind_param("i", $reminder_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $reminder_data = $result->fetch_assoc();
+    $stmt->close();
+    
+    if (!$reminder_data) {
+        send_response('error', 'Reminder not found');
+    }
+    
+    // Delete the reminder
+    $stmt = $conn->prepare("DELETE FROM reminders WHERE reminder_id = ?");
+    $stmt->bind_param("i", $reminder_id);
+    
+    if ($stmt->execute()) {
+        $stmt->close();
+        
+        // Log audit action
+        log_audit_action('DELETE', 'reminders', $reminder_id, $reminder_data, null);
+        
+        send_response('success', 'Reminder deleted successfully');
+    } else {
+        $stmt->close();
+        send_response('error', 'Failed to delete reminder');
+    }
 }
 
 // ==================== GET PENDING REMINDERS (ADMIN) ====================

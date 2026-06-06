@@ -1,0 +1,12 @@
+# Cache prevention headers for admin pages
+<FilesMatch "(admin_dashboard|admin_login)\.html$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Cache-Control "post-check=0, pre-check=0" env=1
+    Header set Pragma "no-cache"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</FilesMatch>
+
+# General cache prevention for all HTML files in admin panel
+<FilesMatch "\.html$">
+    Header set X-UA-Compatible "IE=edge"
+</FilesMatch>

@@ -121,6 +121,11 @@ if ($action === 'update' && $method === 'PUT') {
     $registration_id = $_GET['id'] ?? null;
     if (!$registration_id) send_response('error', 'Registration ID required');
     
+    // Get old values for audit log
+    $old_query = "SELECT * FROM registrations WHERE registration_id = ?";
+    $old_data = db_fetch_one($old_query, [$registration_id]);
+    if (!$old_data) send_response('error', 'Registration not found');
+    
     $data = json_decode(file_get_contents('php://input'), true);
     $new_status = $data['status'] ?? null;
     
@@ -130,12 +135,8 @@ if ($action === 'update' && $method === 'PUT') {
     
     $query = "UPDATE registrations SET status = ? WHERE registration_id = ?";
     if (db_execute($query, [$new_status, $registration_id])) {
-        // Log admin action
-        db_execute(
-            "INSERT INTO audit_log (admin_id, action, table_name, record_id, new_values)
-             VALUES (?, 'UPDATE', 'registrations', ?, ?)",
-            [$_SESSION['user_id'], $registration_id, json_encode(['status' => $new_status])]
-        );
+        // Log admin action using the audit logging function
+        log_audit_action('UPDATE', 'registrations', $registration_id, $old_data, $data);
         
         send_response('success', 'Registration updated successfully');
     } else {

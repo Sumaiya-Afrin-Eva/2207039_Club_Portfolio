@@ -111,6 +111,9 @@ const CONFIG = {
   ]
 };
 
+// Global user object to store logged-in user info
+let currentUser = null;
+
 // Class to handle photo storage
 class PhotoStorage {
   constructor() {
@@ -375,11 +378,10 @@ function loadTeamMembers() {
 function setupContactFormSubmission() {
   const contactForm = document.getElementById('contactForm');
   if (contactForm) {
-    // Remove any old event listeners
-    const newForm = contactForm.cloneNode(true);
-    contactForm.parentNode.replaceChild(newForm, contactForm);
-    newForm.addEventListener('submit', submitContactForm);
-    console.log('Contact form event listener attached');
+    contactForm.addEventListener('submit', submitContactForm);
+    console.log('Contact form listener attached');
+  } else {
+    console.warn('Contact form not found');
   }
 }
 
@@ -423,30 +425,32 @@ function submitContactForm(event) {
   })
   .then(response => response.json())
   .then(result => {
-
-    console.log(result);
+    console.log('Contact API response:', result);
 
     if (result.status === 'success') {
+      showContactMessage(
+        'Thank you! Your message has been sent successfully. We will get back to you soon.',
+        'success'
+      );
 
-        showContactMessage(
-            'Thank you! Your message has been sent successfully.',
-            'success'
-        );
-
-        document.getElementById('contactName').value = '';
-        document.getElementById('contactEmail').value = '';
-        document.getElementById('contactMessageText').value = '';
-
+      // Clear form
+      document.getElementById('contactName').value = '';
+      document.getElementById('contactEmail').value = '';
+      document.getElementById('contactMessageText').value = '';
     } else {
-
-        showContactMessage(
-            result.message || 'Submission failed',
-            'error'
-        );
-
+      showContactMessage(
+        result.message || 'Submission failed. Please try again.',
+        'error'
+      );
     }
-
-})
+  })
+  .catch(error => {
+    console.error('Contact form error:', error);
+    showContactMessage(
+      'Error sending message. Please check your connection and try again.',
+      'error'
+    );
+  });
 }
 
 function showContactMessage(message, type) {
@@ -487,11 +491,210 @@ function escapeHtml(text) {
   return String(text).replace(/[&<>"']/g, m => map[m]);
 }
 
+// ==================== LOGIN FUNCTIONS ====================
+
+/**
+ * Check if user is already logged in on page load
+ */
+function checkLoginStatus() {
+  const loginUrl = CONFIG.API_BASE + 'auth.php?action=current_user&t=' + Date.now();
+  
+  fetch(loginUrl, {
+    method: 'GET',
+    credentials: 'include',
+    cache: 'no-store'
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data && data.status === 'success' && data.data) {
+      // User is logged in
+      updateUserDisplay(data.data);
+    } else {
+      // User is not logged in
+      updateUserDisplay(null);
+    }
+  })
+  .catch(error => {
+    console.log('Login status check error:', error);
+    updateUserDisplay(null);
+  });
+}
+
+/**
+ * Update the UI based on login status
+ */
+function updateUserDisplay(user) {
+  const loginBtn = document.getElementById('loginBtn');
+  const userInfoDisplay = document.getElementById('userInfoDisplay');
+  const userNameDisplay = document.getElementById('userNameDisplay');
+  
+  if (user) {
+    // User is logged in
+    currentUser = user; // Store globally for use in reminder forms
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (userInfoDisplay) {
+      userInfoDisplay.style.display = 'inline';
+      userNameDisplay.textContent = user.full_name || user.email;
+    }
+  } else {
+    // User is not logged in
+    currentUser = null; // Clear global user
+    if (loginBtn) loginBtn.style.display = 'inline-block';
+    if (userInfoDisplay) userInfoDisplay.style.display = 'none';
+  }
+}
+
+/**
+ * Open login modal
+ */
+function openLoginForm() {
+  const modal = document.getElementById('loginModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    // Clear form fields
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginErrorMessage').style.display = 'none';
+  }
+}
+
+/**
+ * Close login modal
+ */
+function closeLoginForm() {
+  const modal = document.getElementById('loginModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+/**
+ * Submit login form
+ */
+function submitLogin(event) {
+  event.preventDefault();
+  
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errorMessageDiv = document.getElementById('loginErrorMessage');
+  
+  if (!email || !password) {
+    errorMessageDiv.textContent = 'Email and password are required';
+    errorMessageDiv.style.display = 'block';
+    return;
+  }
+  
+  const loginUrl = CONFIG.API_BASE + 'auth.php?action=login';
+  
+  fetch(loginUrl, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache'
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data && data.status === 'success') {
+      // Login successful
+      updateUserDisplay(data.data);
+      closeLoginForm();
+      showMessage('Login successful! Welcome ' + data.data.full_name, 'success');
+    } else {
+      // Login failed
+      errorMessageDiv.textContent = data.message || 'Login failed. Please check your credentials.';
+      errorMessageDiv.style.display = 'block';
+    }
+  })
+  .catch(error => {
+    console.error('Login error:', error);
+    errorMessageDiv.textContent = 'An error occurred. Please try again.';
+    errorMessageDiv.style.display = 'block';
+  });
+}
+
+/**
+ * Logout user
+ */
+function logoutUser() {
+  const logoutUrl = CONFIG.API_BASE + 'auth.php?action=logout';
+  
+  fetch(logoutUrl, {
+    method: 'GET',
+    credentials: 'include',
+    cache: 'no-store'
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Clear user display
+    updateUserDisplay(null);
+    showMessage('You have been logged out', 'info');
+  })
+  .catch(error => {
+    console.error('Logout error:', error);
+  });
+}
+
+/**
+ * Show info about signup (contact admin)
+ */
+function showSignupInfo() {
+  alert('To create a new account, please contact the admin at admin@clubportfolio.com');
+}
+
+/**
+ * Show message helper (generic message display)
+ */
+function showMessage(message, type = 'info') {
+  const messageDiv = document.createElement('div');
+  messageDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    z-index: 10000;
+    animation: slideIn 0.3s ease-in-out;
+  `;
+  
+  if (type === 'success') {
+    messageDiv.style.backgroundColor = '#4caf50';
+    messageDiv.style.color = 'white';
+  } else if (type === 'error') {
+    messageDiv.style.backgroundColor = '#d32f2f';
+    messageDiv.style.color = 'white';
+  } else {
+    messageDiv.style.backgroundColor = '#2196f3';
+    messageDiv.style.color = 'white';
+  }
+  
+  messageDiv.textContent = message;
+  document.body.appendChild(messageDiv);
+  
+  setTimeout(() => {
+    messageDiv.remove();
+  }, 3000);
+}
+
 // Initialize when page loads
+// ==================== STARTUP MESSAGE ====================
+console.log('%c🔔 Reminder System Updated! %c', 'color: #38bdf8; font-size: 14px; font-weight: bold;', '');
+console.log('%cNew Professional Design:%c', 'color: #38bdf8; font-weight: bold;', '');
+console.log('- Click "Remind Me" button → Opens event details');
+console.log('- Inline reminder form with professional design');
+console.log('- No more popup dialogs!');
+console.log('%cIf you see an old popup, press Ctrl+Shift+R (or Cmd+Shift+R) to hard refresh', 'color: #f59e0b; font-weight: bold;');
+
 document.addEventListener('DOMContentLoaded', () => {
   loadGallery();
   setupExploreButton();
   setupContactFormSubmission();
   setupSearchFunctionality();
   loadTeamMembers(); // Load team members from database
+  checkLoginStatus(); // Check if user is already logged in
 });

@@ -3,7 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Admin Login - Club Portfolio</title>
+    <script>
+        // Mark when this page is being loaded
+        window.loginLoadTimestamp = new Date().getTime();
+        
+        // CRITICAL: Check if already logged in IMMEDIATELY before page renders
+        // If logged in, redirect to dashboard
+        (function() {
+            const sessionCheckUrl = '/Club_Portfolio/api/auth.php?action=current_user&t=' + window.loginLoadTimestamp;
+            
+            // Use synchronous fetch via XMLHttpRequest for immediate blocking check
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', sessionCheckUrl, false); // synchronous
+            xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            xhr.setRequestHeader('Pragma', 'no-cache');
+            
+            try {
+                xhr.send();
+                const response = JSON.parse(xhr.responseText);
+                
+                // If session valid, redirect to dashboard
+                if (response && response.status === 'success') {
+                    window.location.replace('/Club_Portfolio/admin_dashboard.html');
+                    // Stop rendering login page
+                    document.documentElement.style.display = 'none';
+                }
+            } catch(e) {
+                // On error, allow login page to load (user might not be logged in)
+                console.log('Session check error:', e);
+            }
+        })();
+    </script>
     <style>
         * {
             margin: 0;
@@ -153,6 +187,72 @@
 
     <script>
         const API_BASE = '/Club_Portfolio/api/';
+        
+        // AGGRESSIVE: Prevent page from being cached in browser's back-forward cache
+        
+        // 1. popstate - prevent back button from navigating away
+        window.addEventListener('popstate', function(event) {
+            // Just stay on login page by pushing state again
+            history.pushState({page: 'admin_login', timestamp: new Date().getTime()}, '', window.location.href);
+        });
+
+        // 2. beforeunload - adds overhead that discourages caching
+        window.addEventListener('beforeunload', function(e) {
+            return void 0;
+        });
+        
+        // 3. unload - marks page as unsafe to cache
+        window.addEventListener('unload', function() {
+            // This prevents some browsers from caching with bfcache
+        });
+        
+        // 4. pagehide - fires when leaving page, including back button
+        window.addEventListener('pagehide', function(event) {
+            // If user is navigating away, clear data
+            if (!event.persisted) {
+                sessionStorage.removeItem('admin_logout_time');
+            }
+        });
+        
+        // 5. pageshow - fires when page is shown, including from bfcache
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Page was restored from back-forward cache
+                // Force re-validation of session
+                const sessionCheckUrl = '/Club_Portfolio/api/auth.php?action=current_user&t=' + new Date().getTime();
+                
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', sessionCheckUrl, false); // synchronous
+                xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+                
+                try {
+                    xhr.send();
+                    const response = JSON.parse(xhr.responseText);
+                    
+                    // If already logged in, redirect to dashboard
+                    if (response && response.status === 'success') {
+                        window.location.replace('/Club_Portfolio/admin_dashboard.html');
+                    }
+                } catch(e) {
+                    // On error, stay on login page
+                    console.log('Session check error on pageshow:', e);
+                }
+            }
+            sessionStorage.removeItem('admin_logout_time');
+        });
+
+        // Push initial state when page loads
+        window.addEventListener('load', function() {
+            history.pushState({page: 'admin_login', timestamp: new Date().getTime()}, '', window.location.href);
+            sessionStorage.removeItem('admin_logout_time');
+            
+            // Register service worker for additional cache control (Chrome compatibility)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/Club_Portfolio/sw.js').catch(err => {
+                    console.log('Service worker registration failed (non-critical):', err);
+                });
+            }
+        });
 
         function handleLogin(event) {
             event.preventDefault();
@@ -165,11 +265,14 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password }),
+                cache: 'no-store'
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
+                    // Clear logout marker if it exists
+                    sessionStorage.removeItem('admin_logout_time');
                     // Redirect to admin dashboard
                     window.location.href = 'admin_dashboard.html';
                 } else {
@@ -191,16 +294,6 @@
                 alert.classList.remove('show');
             }, 5000);
         }
-
-        // Check if already logged in
-        fetch(API_BASE + 'auth.php?action=current_user')
-            .then(r => r.json())
-            .then(d => {
-                if (d.status === 'success') {
-                    // Already logged in, redirect to dashboard
-                    window.location.href = 'admin_dashboard.html';
-                }
-            });
     </script>
 </body>
 </html>

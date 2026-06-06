@@ -1,4 +1,16 @@
-const API_BASE = 'api/events.php';
+const API_BASE = '/Club_Portfolio/api/events.php';
+
+// ==================== SECURITY: Prevent old cached prompt behavior ====================
+// Override window.prompt to log any attempts and prevent modal popups
+(function() {
+  const originalPrompt = window.prompt;
+  window.prompt = function(...args) {
+    console.error('[SECURITY] Attempt to show prompt detected:', args);
+    console.error('[INFO] Using new inline reminder form instead');
+    return null;
+  };
+})();
+
 // home-events.js - Event management and UI logic for events section
 class EventManager {
 
@@ -8,6 +20,39 @@ class EventManager {
     this.currentCalendarDate = new Date(); // Current calendar navigation date
     this.filteredEvents = [];          // Array of filtered events
     this.reminderEmail = '';           // Email for remote reminders
+    this.reminderName = '';            // Name for remote reminders
+  }
+
+  /**
+   * Show a toast notification
+   * @param {string} message - Message to display
+   * @param {string} type - Type: 'success', 'error', 'info', 'warning'
+   * @param {number} duration - Duration in milliseconds (default: 5000)
+   */
+  showToast(message, type = 'info', duration = 5000) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: '✓',
+      error: '✕',
+      info: 'ℹ',
+      warning: '⚠'
+    };
+
+    toast.innerHTML = `
+      <span class="toast-icon">${icons[type]}</span>
+      <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, duration + 300);
   }
 
   /**
@@ -131,7 +176,8 @@ class EventManager {
       // Check if Remind Me button was clicked
       const remindBtn = e.target.closest('.event-card-btn.remind');
       if (remindBtn) {
-        this.setReminder();
+        const eventId = parseInt(remindBtn.closest('.event-card').getAttribute('data-event-id'), 10);
+        this.setReminder(eventId);
         return;
       }
 
@@ -293,6 +339,9 @@ class EventManager {
       registerBtn.style.opacity = '1';
     }
 
+    // Initialize inline reminder form
+    this.setupInlineReminderForm();
+
     // Show modal
     document.getElementById('eventDetailModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -348,36 +397,153 @@ class EventManager {
     }
   }
 
-  setReminder() {
-    const email = prompt('Enter your email to set a reminder:');
-    if (email && email.trim()) {
-      this.reminderEmail = email;
-      this.submitReminder();
+  setReminder(eventId) {
+    // Security: Ensure this is the new inline form implementation
+    if (!eventId || typeof eventId !== 'number') {
+      console.error('[ERROR] Invalid event ID for reminder:', eventId);
+      this.showToast('Error setting reminder. Please try again.', 'error');
+      return;
+    }
+
+    // Show event detail modal with inline reminder form
+    this.showEventDetail(eventId);
+    
+    // Scroll to reminder section after a short delay (modal animation)
+    setTimeout(() => {
+      const reminderSection = document.querySelector('.reminder-section');
+      if (reminderSection) {
+        reminderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Focus on email field for immediate input
+        const emailField = document.getElementById('inlineReminderEmail');
+        if (emailField) {
+          emailField.focus();
+          console.log('[INFO] Reminder form ready for input');
+        }
+      }
+    }, 300);
+  }
+
+  setupInlineReminderForm() {
+    // Reset form fields
+    const nameField = document.getElementById('inlineReminderName');
+    const emailField = document.getElementById('inlineReminderEmail');
+    const form = document.getElementById('inlineReminderForm');
+
+    if (nameField) nameField.value = '';
+    if (emailField) emailField.value = '';
+
+    // Reset button to original state
+    const button = form?.querySelector('button[type="submit"]');
+    if (button) {
+      button.textContent = '✓ Set Reminder';
+      button.style.background = ''; // Reset to original blue
+      button.style.cursor = 'pointer';
+      button.disabled = false;
+    }
+
+    // Auto-fill email and name if user is logged in
+    if (typeof currentUser !== 'undefined' && currentUser) {
+      if (nameField) nameField.value = currentUser.full_name || '';
+      if (emailField) emailField.value = currentUser.email || '';
+    }
+
+    // Setup form submission handler
+    if (form) {
+      // Remove any existing listeners by cloning (prevents duplicate listeners)
+      const newForm = form.cloneNode(true);
+      form.parentNode.replaceChild(newForm, form);
+
+      newForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.submitInlineReminder();
+      });
     }
   }
 
-  async submitReminder() {
-    if (!this.reminderEmail) return;
+  async submitInlineReminder() {
+    const nameField = document.getElementById('inlineReminderName');
+    const emailField = document.getElementById('inlineReminderEmail');
+
+    const name = nameField?.value.trim() || '';
+    const email = emailField?.value.trim() || '';
+
+    // Email is required, name is optional
+    if (!email) {
+      this.showToast('Please enter your email address', 'warning');
+      if (emailField) emailField.focus();
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      this.showToast('Please enter a valid email address (e.g., john@example.com)', 'warning');
+      if (emailField) emailField.focus();
+      return;
+    }
+
+    if (!this.currentEventId) {
+      this.showToast('Error: Event ID not found. Please try again.', 'error');
+      return;
+    }
 
     try {
+      console.log('[REMINDER] Submitting reminder:', { event_id: this.currentEventId, name: name || 'Guest', email: email });
+      
       const response = await fetch(`${API_BASE}?action=set_reminder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          event_id: this.currentEventId,
-          email: this.reminderEmail
+          event_id: parseInt(this.currentEventId, 10),
+          name: name || 'Guest',  // Use "Guest" if name not provided
+          email: email
         })
       });
 
-      const data = await response.json();
+      // Parse the response regardless of HTTP status
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('[REMINDER] Failed to parse API response:', parseError);
+        this.showToast('Invalid response from server. Please try again.', 'error');
+        return;
+      }
+
+      console.log('[REMINDER] API Response:', data, 'HTTP Status:', response.status);
+      
       if (data.status === 'success') {
-        alert('✓ Reminder set! You will receive a notification before this event.');
+        this.showToast('✓ Reminder set! You will receive a notification before this event.', 'success');
+        console.log('[REMINDER] Reminder saved successfully with ID:', data.data?.reminder_id);
+        
+        // Update button to show success - turn green
+        const form = document.getElementById('inlineReminderForm');
+        const button = form?.querySelector('button[type="submit"]');
+        if (button) {
+          button.textContent = '✓ Reminder Set';
+          button.style.background = '#10b981'; // Green color
+          button.style.cursor = 'default';
+          button.disabled = true;
+        }
+        
+        // Reset form after successful submission
+        if (nameField) nameField.value = '';
+        if (emailField) emailField.value = '';
+        
+        // Re-populate if user is logged in
+        if (typeof currentUser !== 'undefined' && currentUser) {
+          if (nameField) nameField.value = currentUser.full_name || '';
+          if (emailField) emailField.value = currentUser.email || '';
+        }
       } else {
-        alert(data.message || 'Failed to set reminder');
+        // API returned an error status
+        const errorMsg = data.message || 'Failed to set reminder';
+        console.error('[REMINDER] API Error:', errorMsg);
+        this.showToast(errorMsg, 'error');
       }
     } catch (error) {
-      console.error('Failed to set reminder:', error);
-      alert('Error setting reminder');
+      console.error('[REMINDER] Network error setting reminder:', error);
+      this.showToast('Network error: ' + (error.message || 'Could not connect to server'), 'error');
     }
   }
 
@@ -600,10 +766,11 @@ async function submitRegistration(e) {
 
 async function submitComment() {
   const name = document.getElementById('commentName').value.trim();
+  const email = document.getElementById('commentEmail').value.trim();
   const comment = document.getElementById('commentText').value.trim();
 
   if (!name || !comment) {
-    alert('Please enter both name and comment');
+    eventManager.showToast('Please enter your name and comment', 'warning');
     return;
   }
 
@@ -614,6 +781,7 @@ async function submitComment() {
       body: JSON.stringify({
         event_id: eventManager.currentEventId,
         name: name,
+        email: email || null,
         comment: comment
       })
     });
@@ -622,19 +790,24 @@ async function submitComment() {
 
     if (data.status === 'success') {
       document.getElementById('commentName').value = '';
+      document.getElementById('commentEmail').value = '';
       document.getElementById('commentText').value = '';
+      eventManager.showToast('Comment posted successfully!', 'success');
       eventManager.loadComments(eventManager.currentEventId);
     } else {
-      alert(data.message || 'Failed to post comment');
+      eventManager.showToast(data.message || 'Failed to post comment', 'error');
     }
   } catch (error) {
     console.error('Error:', error);
-    alert('Error posting comment');
+    eventManager.showToast('Error posting comment', 'error');
   }
 }
 
 function setReminder() {
-  eventManager.setReminder();
+  // Prevent any old popup code from executing
+  if (eventManager && typeof eventManager.setReminder === 'function') {
+    eventManager.setReminder();
+  }
 }
 
 function escapeHtml(text) {

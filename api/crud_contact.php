@@ -12,6 +12,7 @@
 
 require_once __DIR__ . '/db_config.php';
 require_once __DIR__ . '/db_functions.php';
+require_once __DIR__ . '/auth.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -28,10 +29,6 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Start session for admin check
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-}
-
-function isAdminLoggedIn() {
-    return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 }
 
 function sendJsonResponse($status, $message, $data = null, $code = 200) {
@@ -54,14 +51,14 @@ try {
             break;
         case 'PUT':
             // Require admin for updates
-            if (!isAdminLoggedIn()) {
+            if (!is_admin_logged_in()) {
                 sendJsonResponse('error', 'Admin access required', null, 403);
             }
             handle_put_contact();
             break;
         case 'DELETE':
             // Require admin for deletion
-            if (!isAdminLoggedIn()) {
+            if (!is_admin_logged_in()) {
                 sendJsonResponse('error', 'Admin access required', null, 403);
             }
             handle_delete_contact();
@@ -82,7 +79,7 @@ function handle_get_contact() {
     $status = $_GET['status'] ?? null;
     
     // Require admin for viewing
-    if (!isAdminLoggedIn()) {
+    if (!is_admin_logged_in()) {
         sendJsonResponse('error', 'Admin access required', null, 403);
     }
 
@@ -176,6 +173,14 @@ function handle_put_contact() {
     }
 
     $contact_id = (int)$data['contact_id'];
+    
+    // Get old values for audit log
+    $old_query = "SELECT * FROM contact_submissions WHERE contact_id = ?";
+    $old_data = db_fetch_one($old_query, [$contact_id]);
+    if (!$old_data) {
+        sendJsonResponse('error', 'Contact submission not found', null, 404);
+    }
+    
     $updates = [];
     $params = [];
 
@@ -202,6 +207,8 @@ function handle_put_contact() {
     $query = "UPDATE contact_submissions SET " . implode(", ", $updates) . " WHERE contact_id = ?";
 
     if (db_execute($query, $params)) {
+        // Log audit action
+        log_audit_action('UPDATE', 'contact_submissions', $contact_id, $old_data, $data);
         sendJsonResponse('success', 'Contact submission updated successfully');
     } else {
         sendJsonResponse('error', 'Failed to update contact submission', null, 500);
@@ -219,6 +226,14 @@ function handle_delete_contact() {
     }
 
     $contact_id = (int)$data['contact_id'];
+    
+    // Get old values for audit log
+    $old_query = "SELECT * FROM contact_submissions WHERE contact_id = ?";
+    $old_data = db_fetch_one($old_query, [$contact_id]);
+    if (!$old_data) {
+        sendJsonResponse('error', 'Contact submission not found', null, 404);
+    }
+    
     $hard_delete = $data['hard_delete'] ?? false;
 
     if ($hard_delete) {
@@ -232,6 +247,8 @@ function handle_delete_contact() {
     }
 
     if ($success) {
+        // Log audit action
+        log_audit_action('DELETE', 'contact_submissions', $contact_id, $old_data, null);
         sendJsonResponse('success', 'Contact submission deleted successfully');
     } else {
         sendJsonResponse('error', 'Failed to delete contact submission', null, 500);

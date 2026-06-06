@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f0f0f0; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        h1 { color: #333; }
+        .event { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 4px; }
+        .event h3 { margin: 0 0 10px 0; color: #0066cc; }
+        .event p { margin: 5px 0; color: #666; }
+        .status { display: inline-block; padding: 4px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; }
+        .status.upcoming { background: #e8f4f8; color: #0066cc; }
+        .error { color: #d32f2f; background: #ffebee; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .success { color: #388e3c; background: #e8f5e9; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .loading { color: #ff9800; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Events API Test</h1>
+        <div id="status" class="loading">Loading events...</div>
+        <div id="events"></div>
+    </div>
+
+    <script>
+        const API_BASE = '/Club_Portfolio/api/events.php';
+        
+        async function loadEvents() {
+            try {
+                console.log('Fetching from:', API_BASE + '?action=get_events');
+                const response = await fetch(API_BASE + '?action=get_events');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'Unknown error');
+                }
+                
+                const events = data.data || [];
+                console.log('Events count:', events.length);
+                
+                if (events.length === 0) {
+                    document.getElementById('status').innerHTML = '<div class="error">No events found in database</div>';
+                    return;
+                }
+                
+                document.getElementById('status').innerHTML = `<div class="success">✓ Successfully loaded ${events.length} events</div>`;
+                
+                let html = '';
+                events.forEach(event => {
+                    html += `
+                        <div class="event">
+                            <h3>${event.title}</h3>
+                            <p><strong>Category:</strong> ${event.category}</p>
+                            <p><strong>Date:</strong> ${event.date} at ${event.time}</p>
+                            <p><strong>Location:</strong> ${event.location}</p>
+                            <p><strong>Description:</strong> ${event.description}</p>
+                            <p>
+                                <strong>Status:</strong> 
+                                <span class="status ${event.status}">${event.status}</span>
+                            </p>
+                            <p><strong>Registered:</strong> ${event.registered_count}/${event.capacity} | <strong>Price:</strong> $${event.price}</p>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('events').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('status').innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Load events when page loads
+        window.addEventListener('load', loadEvents);
+    </script>
+</body>
+</html>
