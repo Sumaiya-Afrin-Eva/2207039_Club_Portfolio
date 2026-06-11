@@ -42,7 +42,6 @@ nav {
   align-items: center;
   gap: 20px;
   flex-grow: 1;
-  padding-left: 400px;
 }
 
 nav a {
@@ -53,13 +52,6 @@ nav a {
 
 nav a:hover {
   color: #38bdf8;
-}
-
-#userAuthSection {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-left: auto;
 }
 
 .hero {
