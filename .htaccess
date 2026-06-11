@@ -1,12 +1,29 @@
-# Cache prevention headers for admin pages
+# Cache prevention headers for admin pages - AGGRESSIVE for all browsers including Chrome
 <FilesMatch "(admin_dashboard|admin_login)\.html$">
-    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    # Prevent all caching
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0, private"
     Header set Cache-Control "post-check=0, pre-check=0" env=1
     Header set Pragma "no-cache"
     Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    
+    # Chrome-specific headers
+    Header set X-UA-Compatible "IE=edge"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # ETag prevention for aggressive cache busting
+    Header unset ETag
+    Header set ETag ""
 </FilesMatch>
 
-# General cache prevention for all HTML files in admin panel
+# General HTML cache prevention
 <FilesMatch "\.html$">
     Header set X-UA-Compatible "IE=edge"
+    Header set Cache-Control "max-age=0, must-revalidate"
+</FilesMatch>
+
+# Disable caching for API endpoints
+<FilesMatch "api/.*\.php$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
 </FilesMatch>

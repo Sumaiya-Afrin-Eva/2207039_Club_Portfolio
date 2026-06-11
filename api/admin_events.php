@@ -115,10 +115,9 @@ if ($action === 'registrations' && $method === 'GET') {
         // Get registrations for a specific event
         $registrations = get_event_registrations($event_id);
     } else {
-        // Get all registrations from all events
+        // Get all registrations - the registrations table stores name/email directly, not user_id
         $registrations = db_select(
-            "SELECT r.*, u.full_name, u.email, e.title as event_title FROM registrations r
-             LEFT JOIN users u ON r.user_id = u.user_id
+            "SELECT r.*, e.title as event_title FROM registrations r
              LEFT JOIN events e ON r.event_id = e.event_id
              ORDER BY r.registration_date DESC",
             []

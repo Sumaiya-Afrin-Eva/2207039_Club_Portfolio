@@ -596,3 +596,442 @@ Stack trace:
 [2026-06-06 21:42:53] Comment: Processing for event - Admin Dashboard Test Event
 [2026-06-06 21:42:53] Comment: Creating comment for name=Adam, event_id=11
 [2026-06-06 21:42:53] Comment: Success - comment_id=7
+[09-Jun-2026 08:36:11 Europe/Berlin] Contact submission saved - ID: 7, Name: Sumaiya Afrin Eva, Email: afrineva013@gmail.com
+[09-Jun-2026 08:36:40 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:36:40 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:36:41 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:36:45 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:36:46 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:37:50 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:37:51 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:38:01 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:38:01 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:39:35 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:39:36 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:39:36 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[2026-06-09 08:41:39] Registration attempt with data: {"event_id":8,"name":"Sumaiya Afrin Eva","email":"afrineva013@gmail.com","phone":"1234567676","address":"Dhaka","institute":"KUET","gender":"Female","academic_year":"3rd","experience":"Beginner"}
+[2026-06-09 08:41:39] Registration: Processing event_id=8
+[2026-06-09 08:41:39] Registration: Event found - Photography Competition (registered: 0/50)
+[2026-06-09 08:41:39] Registration: Creating registration record - email=afrineva013@gmail.com
+[2026-06-09 08:41:39] Registration: Successfully registered with id=2
+[09-Jun-2026 08:41:47 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:41:50 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:42:19 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:44:35 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:44:36 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:44:42 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:44:51 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:45:41 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:45:42 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:15 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:16 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:16 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:17 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:19 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:19 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:20 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:24 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:26 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:32 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:36 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:49:51 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:52:25 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:52:28 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:52:29 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:52:29 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:52:30 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:52:34 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:52:34 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:55:43 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:55:43 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:55:54 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:55:55 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:55:56 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:55:57 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:55:59 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:00 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:01 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:01 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:14 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:14 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:15 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:15 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:16 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:17 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:17 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:18 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:18 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:19 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:20 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:21 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:21 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:22 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:22 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:22 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:56:23 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:57:08 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[09-Jun-2026 08:57:16 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'r.user_id' in 'on clause' in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php:65
+Stack trace:
+#0 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php(65): mysqli->prepare('SELECT r.*, u.f...')
+#1 /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/admin_events.php(119): db_select('SELECT r.*, u.f...', Array)
+#2 {main}
+  thrown in /Applications/XAMPP/xamppfiles/htdocs/Club_Portfolio/api/db_config.php on line 65
+[2026-06-09 10:01:24] Registration attempt with data: {"event_id":11,"name":"Sadia Akter","email":"sadia@gmail.com","phone":"01836394563","address":"123 Park Street","institute":"Dhaka University","gender":"Female","academic_year":"2nd","experience":"Intermediate"}
+[2026-06-09 10:01:24] Registration: Processing event_id=11
+[2026-06-09 10:01:24] Registration: Event found - Admin Dashboard Test Event (registered: 0/75)
+[2026-06-09 10:01:24] Registration: Creating registration record - email=sadia@gmail.com
+[2026-06-09 10:01:24] Registration: Successfully registered with id=3
+[2026-06-11 08:00:25] Registration attempt with data: {"event_id":15,"name":"Sumaiya Afrin Eva","email":"afrineva013@gmail.com","phone":"23456789","address":"sdfghjk","institute":"zxcvbnm","gender":"Female","academic_year":"3rd","experience":"Beginner"}
+[2026-06-11 08:00:25] Registration: Processing event_id=15
+[2026-06-11 08:00:25] Registration: Event found - Editing Workshop (registered: 0/30)
+[2026-06-11 08:00:25] Registration: Creating registration record - email=afrineva013@gmail.com
+[2026-06-11 08:00:25] Registration: Successfully registered with id=4
+[2026-06-11 08:47:06] Registration attempt with data: {"event_id":14,"name":"Ayesha Siddiqa","email":"ayesha@gmail.com","phone":"01983648462","address":"123 Indira Road, Dhaka","institute":"Rajshahi University","gender":"Female","academic_year":"4th","experience":"Professional"}
+[2026-06-11 08:47:06] Registration: Processing event_id=14
+[2026-06-11 08:47:06] Registration: Event found - Photo Walk (registered: 0/20)
+[2026-06-11 08:47:06] Registration: Creating registration record - email=ayesha@gmail.com
+[2026-06-11 08:47:06] Registration: Successfully registered with id=5
+[2026-06-11 08:50:21] Comment attempt with data: {"event_id":14,"name":"Promi","email":null,"comment":"Best of luck to all of you. \ud83e\udd73"}
+[2026-06-11 08:50:21] Comment: Processing for event - Photo Walk
+[2026-06-11 08:50:21] Comment: Creating comment for name=Promi, event_id=14
+[2026-06-11 08:50:21] Comment: Success - comment_id=8
