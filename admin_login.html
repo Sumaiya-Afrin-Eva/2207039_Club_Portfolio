@@ -3,40 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Admin Login - Club Portfolio</title>
+    
+    <!-- SERVICE WORKER: Do not cache this page -->
+    <meta name="cache-control" content="no-store">
+    <meta name="pragma" content="no-cache">
+    
+    <!-- Loading Screen HTML - blocks interaction until auth validation completes -->
+    <style id="authBlockingStyle">
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        body.auth-validating {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            overflow: hidden !important;
+        }
+        body.auth-validating * {
+            display: none !important;
+        }
+        #authValidatingOverlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 99999 !important;
+            flex-direction: column !important;
+            pointer-events: none !important;
+            display: none !important;
+        }
+        #authValidatingOverlay.validating {
+            display: flex !important;
+            pointer-events: auto !important;
+        }
+        .auth-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3) !important;
+            border-top-color: white !important;
+            border-radius: 50% !important;
+            width: 50px !important;
+            height: 50px !important;
+            animation: spin 1s linear infinite !important;
+        }
+        .auth-status {
+            margin-top: 20px !important;
+            color: white !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 14px !important;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg) !important; }
+        }
+    </style>
+    
+    <!-- Blocking overlay during validation -->
+    <div id="authValidatingOverlay" class="validating" style="display: flex !important;">
+        <div class="auth-spinner"></div>
+        <div class="auth-status">Validating session...</div>
+    </div>
+    
     <script>
-        // Mark when this page is being loaded
+        // ULTRA-SECURE: Validate session BEFORE any page rendering
+        // This approach is optimized for Chrome's handling of pages
+        
+        // 1. Mark page as validating and show overlay
+        document.body.classList.add('auth-validating');
+        const overlay = document.getElementById('authValidatingOverlay');
+        if (overlay) {
+            overlay.classList.add('validating');
+            overlay.style.display = 'flex';
+        }
+        
+        window.isValidatingLoginSession = true;
         window.loginLoadTimestamp = new Date().getTime();
         
-        // CRITICAL: Check if already logged in IMMEDIATELY before page renders
-        // If logged in, redirect to dashboard
-        (function() {
+        // 2. Prevent any interaction during validation
+        document.addEventListener('click', (e) => {
+            if (window.isValidatingLoginSession) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+        
+        document.addEventListener('keydown', (e) => {
+            if (window.isValidatingLoginSession) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+        
+        // 3. Session validation with proper error handling for Chrome
+        function validateLoginSession() {
             const sessionCheckUrl = '/Club_Portfolio/api/auth.php?action=current_user&t=' + window.loginLoadTimestamp;
             
-            // Use synchronous fetch via XMLHttpRequest for immediate blocking check
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', sessionCheckUrl, false); // synchronous
+            xhr.withCredentials = true;
+            xhr.open('GET', sessionCheckUrl, false); // SYNCHRONOUS
             xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             xhr.setRequestHeader('Pragma', 'no-cache');
+            xhr.setRequestHeader('Expires', '0');
             
             try {
                 xhr.send();
-                const response = JSON.parse(xhr.responseText);
                 
-                // If session valid, redirect to dashboard
-                if (response && response.status === 'success') {
-                    window.location.replace('/Club_Portfolio/admin_dashboard.html');
-                    // Stop rendering login page
-                    document.documentElement.style.display = 'none';
+                // Check response status code
+                if (xhr.status === 200 || xhr.status === 0) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        
+                        if (response && response.status === 'success') {
+                            // Already logged in - redirect to dashboard immediately
+                            window.location.replace('/Club_Portfolio/admin_dashboard.html?nocache=' + Date.now());
+                            // Fallback
+                            setTimeout(() => {
+                                window.location.href = '/Club_Portfolio/admin_dashboard.html?nocache=' + Date.now();
+                            }, 100);
+                            return false;
+                        }
+                    } catch(parseErr) {
+                        // JSON parse error - not authenticated, proceed with login
+                    }
                 }
+                
+                // Not logged in - allow login page to load
+                window.isValidatingLoginSession = false;
+                document.body.classList.remove('auth-validating');
+                if (overlay) {
+                    overlay.classList.remove('validating');
+                    overlay.style.display = 'none';
+                    overlay.style.pointerEvents = 'none';
+                }
+                return true;
+                
             } catch(e) {
-                // On error, allow login page to load (user might not be logged in)
-                console.log('Session check error:', e);
+                // On network error, assume not logged in and allow login page to load
+                window.isValidatingLoginSession = false;
+                document.body.classList.remove('auth-validating');
+                if (overlay) {
+                    overlay.classList.remove('validating');
+                    overlay.style.display = 'none';
+                    overlay.style.pointerEvents = 'none';
+                }
+                return true;
             }
-        })();
+        }
+        
+        // 4. Validate IMMEDIATELY
+        validateLoginSession();
     </script>
     <style>
         * {
@@ -222,6 +349,7 @@
                 const sessionCheckUrl = '/Club_Portfolio/api/auth.php?action=current_user&t=' + new Date().getTime();
                 
                 const xhr = new XMLHttpRequest();
+                xhr.withCredentials = true; // Include cookies with this request
                 xhr.open('GET', sessionCheckUrl, false); // synchronous
                 xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
                 
@@ -265,6 +393,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ email, password }),
                 cache: 'no-store'
             })

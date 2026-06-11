@@ -3,41 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Admin Dashboard - Club Portfolio</title>
+    
+    <!-- SERVICE WORKER: Do not cache this page -->
+    <meta name="cache-control" content="no-store">
+    <meta name="pragma" content="no-cache">
+    
+    <!-- Loading Screen HTML - blocks interaction until auth validation completes -->
+    <style id="authBlockingStyle">
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        body.auth-validating {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: #f5f7fa !important;
+            overflow: hidden !important;
+        }
+        body.auth-validating * {
+            display: none !important;
+        }
+        #authValidatingOverlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: #f5f7fa !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 99999 !important;
+            flex-direction: column !important;
+            pointer-events: none !important;
+            display: none !important;
+        }
+        #authValidatingOverlay.validating {
+            display: flex !important;
+            pointer-events: auto !important;
+        }
+        .auth-spinner {
+            border: 4px solid #e0e0e0 !important;
+            border-top-color: #667eea !important;
+            border-radius: 50% !important;
+            width: 50px !important;
+            height: 50px !important;
+            animation: spin 1s linear infinite !important;
+        }
+        .auth-status {
+            margin-top: 20px !important;
+            color: #666 !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 14px !important;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg) !important; }
+        }
+    </style>
+    
+    <!-- Blocking overlay during validation -->
+    <div id="authValidatingOverlay" class="validating" style="display: flex !important;">
+        <div class="auth-spinner"></div>
+        <div class="auth-status">Validating session...</div>
+    </div>
+    
     <script>
-        // Mark when this page is being loaded
+        // ULTRA-SECURE: Validate session BEFORE any page rendering
+        // This approach is optimized for Chrome's handling of pages
+        
+        // 1. Mark page as validating and block all content immediately
+        document.body.classList.add('auth-validating');
+        window.isValidatingDashboardSession = true;
         window.dashboardLoadTimestamp = new Date().getTime();
         
-        // CRITICAL: Validate session IMMEDIATELY before page renders
-        // This prevents showing cached dashboard after logout
-        (function() {
+        const overlay = document.getElementById('authValidatingOverlay');
+        if (overlay) {
+            overlay.classList.add('validating');
+            overlay.style.display = 'flex';
+        }
+        
+        // 2. Prevent any interaction during validation
+        document.addEventListener('click', (e) => {
+            if (window.isValidatingDashboardSession) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+        
+        document.addEventListener('keydown', (e) => {
+            if (window.isValidatingDashboardSession) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+        
+        // 3. Session validation with proper error handling for Chrome
+        function validateDashboardSession() {
             const sessionCheckUrl = '/Club_Portfolio/api/auth.php?action=current_user&t=' + window.dashboardLoadTimestamp;
             
-            // Use synchronous fetch via XMLHttpRequest for immediate blocking check
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', sessionCheckUrl, false); // synchronous
+            xhr.withCredentials = true;
+            xhr.open('GET', sessionCheckUrl, false); // SYNCHRONOUS
             xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             xhr.setRequestHeader('Pragma', 'no-cache');
+            xhr.setRequestHeader('Expires', '0');
             
             try {
                 xhr.send();
-                const response = JSON.parse(xhr.responseText);
                 
-                // If session invalid, immediately redirect before page renders
-                if (!response || response.status !== 'success') {
-                    window.location.replace('/Club_Portfolio/admin_login.html?nocache=' + new Date().getTime());
-                    // Stop all further page load
-                    document.documentElement.style.display = 'none';
+                // Check response status code
+                if (xhr.status === 200 || xhr.status === 0) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        
+                        if (response && response.status === 'success') {
+                            // Authenticated - allow page to load
+                            window.isValidatingDashboardSession = false;
+                            document.body.classList.remove('auth-validating');
+                            if (overlay) {
+                                overlay.classList.remove('validating');
+                                overlay.style.display = 'none';
+                                overlay.style.pointerEvents = 'none';
+                            }
+                            return true;
+                        }
+                    } catch(parseErr) {
+                        // JSON parse error - not authenticated
+                        throw new Error('Invalid response');
+                    }
                 }
+                
+                // Not authenticated
+                throw new Error('Not authenticated');
+                
             } catch(e) {
-                // On error, redirect to login for security
-                window.location.replace('/Club_Portfolio/admin_login.html?nocache=' + new Date().getTime());
-                document.documentElement.style.display = 'none';
+                // ANY error - redirect to login immediately
+                // Force redirect with hard reload to bypass cache
+                window.location.replace('/Club_Portfolio/admin_login.html?nocache=' + Date.now());
+                // Fallback for browsers that don't respect replace
+                setTimeout(() => {
+                    window.location.href = '/Club_Portfolio/admin_login.html?nocache=' + Date.now();
+                }, 100);
+                return false;
             }
-        })();
+        }
+        
+        // 4. Validate IMMEDIATELY
+        validateDashboardSession();
     </script>
     <style>
         * {
@@ -406,6 +527,64 @@
                             <tbody></tbody>
                         </table>
                     </div>
+
+                    <!-- Event Details Panel -->
+                    <div id="eventDetailsPanel" style="display: none; margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="margin: 0; font-size: 20px;">Event Details</h3>
+                            <button onclick="closeEventDetails()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center;">×</button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Title</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventTitle">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Category</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventCategory">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Event Date</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventDate">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Status</div>
+                                <div style="font-size: 16px; font-weight: 600; text-transform: uppercase;" id="detailEventStatus">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Location</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventLocation">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Capacity</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventCapacity">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Start Time</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventStartTime">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">End Time</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventEndTime">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Price</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventPrice">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Registered / Capacity</div>
+                                <div style="font-size: 16px; font-weight: 600;" id="detailEventRegistered">-</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Description</div>
+                            <div style="font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word;" id="detailEventDescription">-</div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 5px; text-transform: uppercase;">Organizer</div>
+                            <div style="font-size: 16px; font-weight: 600;" id="detailEventOrganizer">-</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Users View -->
@@ -432,14 +611,13 @@
 
                 <!-- Registrations View -->
                 <div id="registrations" class="view hidden">
-                    <h2>Registrations</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0;">Registrations</h2>
+                        <select id="eventSelectForRegistrations" onchange="loadRegistrationsFiltered()" style="padding: 8px 12px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                            <option value="">-- All Events --</option>
+                        </select>
+                    </div>
                     <div class="card">
-                        <div class="form-group">
-                            <label>Filter by Event:</label>
-                            <select id="eventSelectForRegistrations" onchange="loadRegistrationsFiltered()">
-                                <option value="">-- All Events --</option>
-                            </select>
-                        </div>
                         <table id="registrationsTable">
                             <thead>
                                 <tr>
@@ -1028,8 +1206,11 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
-            setupEventListeners();
+            // First verify auth before loading dashboard
+            checkAuth().then(() => {
+                setupEventListeners();
+                loadDashboard(); // Load dashboard stats after auth confirmed
+            });
             
             // Setup history manipulation as backup protection against back button
             // (Primary protection is in <head> synchronous check)
@@ -1131,33 +1312,39 @@
 
         // Auth
         function checkAuth() {
-            // Check if logout was marked in session storage
-            if (sessionStorage.getItem('admin_logout_time')) {
-                sessionStorage.removeItem('admin_logout_time');
-                window.location.replace('admin_login.html?nocache=' + new Date().getTime());
-                return;
-            }
-            
-            fetch(API_BASE + 'auth.php?action=current_user', {
-                headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate'
-                },
-                // Prevent caching of this fetch request
-                cache: 'no-store'
-            })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.status === 'success') {
-                        document.getElementById('userName').textContent = d.data.full_name;
-                    } else {
-                        // Not authenticated, redirect to login
-                        window.location.replace('admin_login.html?nocache=' + new Date().getTime());
-                    }
-                })
-                .catch(error => {
-                    console.error('Auth check failed:', error);
+            return new Promise((resolve, reject) => {
+                // Check if logout was marked in session storage
+                if (sessionStorage.getItem('admin_logout_time')) {
+                    sessionStorage.removeItem('admin_logout_time');
                     window.location.replace('admin_login.html?nocache=' + new Date().getTime());
-                });
+                    reject('Logged out');
+                    return;
+                }
+                
+                fetch(API_BASE + 'auth.php?action=current_user', {
+                    credentials: 'include',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate'
+                    },
+                    cache: 'no-store'
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.status === 'success') {
+                            document.getElementById('userName').textContent = d.data.full_name;
+                            resolve();
+                        } else {
+                            // Not authenticated, redirect to login
+                            window.location.replace('admin_login.html?nocache=' + new Date().getTime());
+                            reject('Not authenticated');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Auth check failed:', error);
+                        window.location.replace('admin_login.html?nocache=' + new Date().getTime());
+                        reject(error);
+                    });
+            });
         }
 
         function logout() {
@@ -1166,6 +1353,7 @@
             
             fetch(API_BASE + 'auth.php?action=logout', {
                 method: 'GET',
+                credentials: 'include',
                 headers: {
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
                     'Pragma': 'no-cache',
@@ -1193,27 +1381,56 @@
 
         // Dashboard
         function loadDashboard() {
+            // Create individual fetch promises with better error handling
+            const fetchWithTimeout = (url, timeout = 5000) => {
+                return Promise.race([
+                    fetch(url, { credentials: 'include' }),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Request timeout')), timeout)
+                    )
+                ]).then(r => {
+                    if (!r.ok) {
+                        throw new Error(`HTTP ${r.status}`);
+                    }
+                    return r.text().then(text => {
+                        if (!text) {
+                            return { status: 'success', data: [] };
+                        }
+                        return JSON.parse(text);
+                    });
+                });
+            };
+
             Promise.all([
-                fetch(API_BASE + 'admin_events.php?action=list'),
-                fetch(API_BASE + 'admin_users.php?action=list'),
-                fetch(API_BASE + 'admin_events.php?action=registrations'),
-            ]).then(rs => Promise.all(rs.map(r => r.json())))
+                fetchWithTimeout(API_BASE + 'admin_events.php?action=list', 5000)
+                    .catch(err => { console.error('Events API error:', err); return { data: [] }; }),
+                fetchWithTimeout(API_BASE + 'admin_users.php?action=list', 5000)
+                    .catch(err => { console.error('Users API error:', err); return { data: [] }; }),
+                fetchWithTimeout(API_BASE + 'admin_events.php?action=registrations', 5000)
+                    .catch(err => { console.error('Registrations API error:', err); return { data: [] }; }),
+            ])
               .then(ds => {
                   const events = ds[0].data || [];
                   const users = ds[1].data || [];
                   const registrations = ds[2].data || [];
+
+                  console.log('Dashboard loaded - Events:', events.length, 'Users:', users.length, 'Registrations:', registrations.length);
 
                   document.getElementById('totalEvents').textContent = events.length;
                   document.getElementById('totalUsers').textContent = users.length;
                   document.getElementById('totalRegistrations').textContent = registrations.length;
                   document.getElementById('upcomingEvents').textContent = 
                       events.filter(e => e.status === 'upcoming').length;
+              })
+              .catch(err => {
+                  console.error('Error loading dashboard:', err);
+                  showAlert('Error loading dashboard data: ' + err.message, 'error');
               });
         }
 
         // Events Management
         function loadEvents() {
-            fetch(API_BASE + 'admin_events.php?action=list')
+            fetch(API_BASE + 'admin_events.php?action=list', { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     const events = d.data || [];
@@ -1229,8 +1446,9 @@
                                 <td>${event.status}</td>
                                 <td>${event.registered_count}/${event.capacity}</td>
                                 <td>
-                                    <button class="btn btn-primary" onclick="editEvent(${event.event_id})">Update</button>
-                                    <button class="btn btn-danger" onclick="deleteEvent(${event.event_id})">Delete</button>
+                                    <button class="btn btn-primary" onclick="viewEventDetails(${event.event_id})" style="background: #1e90ff; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px; width: 70px; text-align: center;">View</button>
+                                    <button class="btn btn-primary" onclick="editEvent(${event.event_id})" style="background: #667eea; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px; width: 70px; text-align: center;">Update</button>
+                                    <button class="btn btn-danger" onclick="deleteEvent(${event.event_id})" style="background: #ff6b6b; color: white; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; width: 70px; text-align: center;">Delete</button>
                                 </td>
                             </tr>
                         `;
@@ -1252,7 +1470,7 @@
 
         function editEvent(eventId) {
             currentEditingEventId = eventId;
-            fetch(API_BASE + 'admin_events.php?action=get&event_id=' + eventId)
+            fetch(API_BASE + 'admin_events.php?action=get&event_id=' + eventId, { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     if (d.status === 'success') {
@@ -1443,9 +1661,49 @@
             });
         }
 
+        function viewEventDetails(eventId) {
+            fetch(API_BASE + 'admin_events.php?action=get&event_id=' + eventId, { credentials: 'include' })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.status === 'success') {
+                        const event = d.data;
+                        
+                        // Populate the details panel
+                        document.getElementById('detailEventTitle').textContent = event.title || '-';
+                        document.getElementById('detailEventCategory').textContent = event.category || '-';
+                        document.getElementById('detailEventDate').textContent = event.event_date || '-';
+                        document.getElementById('detailEventStatus').textContent = (event.status || '-').toUpperCase();
+                        document.getElementById('detailEventLocation').textContent = event.location || '-';
+                        document.getElementById('detailEventCapacity').textContent = event.capacity || '-';
+                        document.getElementById('detailEventStartTime').textContent = event.start_time || '-';
+                        document.getElementById('detailEventEndTime').textContent = event.end_time || '-';
+                        document.getElementById('detailEventPrice').textContent = event.price || '0';
+                        document.getElementById('detailEventRegistered').textContent = (event.registered_count || 0) + '/' + (event.capacity || 0);
+                        document.getElementById('detailEventDescription').textContent = event.description || 'No description provided';
+                        document.getElementById('detailEventOrganizer').textContent = event.admin_organizer_name || 'Not assigned';
+                        
+                        // Show the details panel
+                        document.getElementById('eventDetailsPanel').style.display = 'block';
+                        
+                        // Scroll to the panel
+                        document.getElementById('eventDetailsPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        showAlert('Failed to load event details', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    showAlert('Error loading event details', 'error');
+                });
+        }
+
+        function closeEventDetails() {
+            document.getElementById('eventDetailsPanel').style.display = 'none';
+        }
+
         // Users Management
         function loadUsers() {
-            fetch(API_BASE + 'admin_users.php?action=list')
+            fetch(API_BASE + 'admin_users.php?action=list', { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     const users = d.data || [];
@@ -1460,7 +1718,7 @@
                                 <td>${user.role}</td>
                                 <td>${new Date(user.created_at).toLocaleDateString()}</td>
                                 <td>
-                                    <button class="btn btn-warning" onclick="updateUser(${user.user_id}, '${escapeHtml(user.email || '')}', '${escapeHtml(user.full_name)}', '${user.role}')">Update</button>
+                                    <button class="btn btn-primary" onclick="updateUser(${user.user_id}, '${escapeHtml(user.email || '')}', '${escapeHtml(user.full_name)}', '${user.role}')">Update</button>
                                     <button class="btn btn-danger" onclick="deleteUser(${user.user_id}, '${escapeHtml(user.full_name)}')">Delete</button>
                                 </td>
                             </tr>
@@ -1566,7 +1824,7 @@
 
         function loadRegistrations() {
             // Load all events for filter dropdown
-            fetch(API_BASE + 'admin_events.php?action=list')
+            fetch(API_BASE + 'admin_events.php?action=list', { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     const events = d.data || [];
@@ -1586,7 +1844,7 @@
         }
 
         function loadAllRegistrations() {
-            fetch(API_BASE + 'admin_events.php?action=participants')
+            fetch(API_BASE + 'admin_events.php?action=participants', { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     allRegistrations = d.data || [];
@@ -1631,8 +1889,8 @@
                         <td>${reg.experience || 'N/A'}</td>
                         <td>${new Date(reg.registration_date).toLocaleDateString()}</td>
                         <td>
-                            <button onclick="viewRegistrationDetails(${reg.registration_id})" style="background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">View Details</button>
-                            <button class="btn btn-danger" onclick="deleteRegistration(${reg.registration_id})">Delete</button>
+                            <button onclick="viewRegistrationDetails(${reg.registration_id})" style="padding: 4px 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 12px;">View</button>
+                            <button onclick="deleteRegistration(${reg.registration_id})" style="padding: 4px 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -1698,7 +1956,7 @@
         }
 
         function loadAllComments() {
-            fetch(API_BASE + 'admin_events.php?action=comments')
+            fetch(API_BASE + 'admin_events.php?action=comments', { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     displayComments(d.data || []);
@@ -1714,7 +1972,7 @@
                 return;
             }
 
-            fetch(API_BASE + 'admin_events.php?action=comments&event_id=' + eventId)
+            fetch(API_BASE + 'admin_events.php?action=comments&event_id=' + eventId, { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     displayComments(d.data || []);
@@ -1792,7 +2050,7 @@
         let currentEditingTeamId = null;
 
         function loadTeam() {
-            fetch(API_BASE + 'crud_team.php?include_inactive=true')
+            fetch(API_BASE + 'crud_team.php?include_inactive=true', { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     const team = d.data || [];
@@ -1808,7 +2066,7 @@
                                 <td><span style="padding: 5px 10px; border-radius: 3px; background: ${member.is_active ? '#c6f6d5' : '#fed7d7'}; color: ${member.is_active ? '#22543d' : '#742a2a'};">${member.is_active ? 'Active' : 'Inactive'}</span></td>
                                 <td>${member.display_order}</td>
                                 <td>
-                                    <button class="btn btn-primary" onclick="editTeam(${member.team_id})">Edit</button>
+                                    <button class="btn btn-primary" onclick="editTeam(${member.team_id})">Update</button>
                                     <button class="btn btn-danger" onclick="deleteTeam(${member.team_id})">Delete</button>
                                 </td>
                             </tr>
@@ -1831,7 +2089,7 @@
         }
 
         function editTeam(teamId) {
-            fetch(API_BASE + 'crud_team.php?team_id=' + teamId)
+            fetch(API_BASE + 'crud_team.php?team_id=' + teamId, { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     if (d.data) {
@@ -1920,7 +2178,7 @@
             const status = document.getElementById('contactStatusFilter').value;
             const url = status ? API_BASE + 'crud_contact.php?status=' + status : API_BASE + 'crud_contact.php';
 
-            fetch(url)
+            fetch(url, { credentials: 'include' })
                 .then(r => r.json())
                 .then(d => {
                     const contacts = d.data || [];

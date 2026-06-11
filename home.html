@@ -12,14 +12,12 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
-
+    <!-- CSS Connection -->
     <link rel="stylesheet" href="home.css?v=999" />
   </head>
 
   <body>
-    <!-- Toast Notifications Container -->
-    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
-
+    <!-- Header -->
     <header>
       <h1>PhotoClub</h1>
       <nav>
@@ -29,13 +27,6 @@
         <a href="#events">Events</a>
         <a href="#members">Members</a>
         <a href="#contact">Contact</a>
-        <span id="userAuthSection" style="margin-left: auto;">
-          <button id="loginBtn" class="btn btn-login" onclick="openLoginForm()" style="padding: 8px 16px; margin: 0 10px;">Login</button>
-          <span id="userInfoDisplay" style="display: none; color: #fff; margin-right: 15px;">
-            Welcome <strong id="userNameDisplay"></strong>
-            <button class="btn btn-logout" onclick="logoutUser()" style="padding: 5px 12px; margin-left: 10px;">Logout</button>
-          </span>
-        </span>
       </nav>
     </header>
 
