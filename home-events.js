@@ -725,12 +725,15 @@ async function submitRegistration(e) {
     console.log('Response Status:', response.status);
     console.log('Response OK:', response.ok);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    // Parse JSON response first, regardless of HTTP status
+    let data;
+    try {
+      data = await response.json();
+      console.log('Response Data:', data);
+    } catch (parseError) {
+      console.error('Failed to parse JSON response:', parseError);
+      throw new Error('Invalid response from server');
     }
-
-    const data = await response.json();
-    console.log('Response Data:', data);
 
     if (data.status === 'success') {
       console.log('Registration successful!');

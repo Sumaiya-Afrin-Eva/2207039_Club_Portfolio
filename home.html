@@ -5,19 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Expires" content="0" /> 
     <title>Photography & Media Club</title>
 
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
-    <!-- CSS Connection -->
+
     <link rel="stylesheet" href="home.css?v=999" />
   </head>
 
   <body>
-    <!-- Header -->
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <header>
       <h1>PhotoClub</h1>
       <nav>
@@ -91,8 +95,6 @@
       <h2>Past Events Archive</h2>
       <div class="cards" id="pastEventsContainer"></div>
     </section>
-
-    <!-- Team Section -->
     <section id="members">
       <h2>Our Team</h2>
       <div class="team" id="teamContainer"></div>
@@ -103,8 +105,8 @@
       <form class="contact-form" id="contactForm">
         <input type="text" id="contactName" placeholder="Your Name" required />
         <input type="email" id="contactEmail" placeholder="Your Email" required />
-        <textarea id="contactMessageText" placeholder="Your Message" rows="4" required></textarea>
-        <button type="submit" class="btn">Send Message</button>
+        <textarea id="contactMessageText" placeholder="Your Message" rows="4"></textarea>
+        <button class="btn">Send Message</button>
       </form>
       <div id="contactStatusMessage" style="margin-top: 15px; display: none;"></div>
     </section>
@@ -250,37 +252,30 @@
               <h3>🔔 Get Event Reminder</h3>
               <p class="reminder-subtitle">We'll send you a notification 24 hours before the event</p>
             </div>
-            
-            <form id="inlineReminderForm" class="inline-reminder-form" novalidate>
+            <form id="inlineReminderForm" class="inline-reminder-form">
               <div class="reminder-form-group">
-                <label for="inlineReminderName">
-                  <span class="label-text">Your Full Name</span>
+                <label>
+                  Your Full Name
                   <span class="optional-hint">(optional)</span>
                 </label>
                 <input 
                   type="text" 
                   id="inlineReminderName" 
-                  name="name" 
-                  placeholder="e.g., John Doe (optional)" 
-                  autocomplete="name"
+                  placeholder="Your name (not required)"
                 />
               </div>
-
               <div class="reminder-form-group">
-                <label for="inlineReminderEmail">
-                  <span class="label-text">Email Address</span>
+                <label>
+                  Email Address
                   <span class="required-asterisk">*</span>
                 </label>
                 <input 
                   type="email" 
                   id="inlineReminderEmail" 
-                  name="email" 
-                  placeholder="e.g., john@example.com" 
-                  autocomplete="email"
+                  placeholder="your.email@example.com"
                   required
                 />
               </div>
-
               <button type="submit" class="btn btn-primary">✓ Set Reminder</button>
             </form>
           </div>
@@ -403,7 +398,6 @@
         </p>
       </div>
     </div>
-
     <footer>
       <p>© 2026 Photography & Media Club | All Rights Reserved</p>
     </footer>

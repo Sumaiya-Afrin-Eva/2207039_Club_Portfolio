@@ -150,16 +150,6 @@ function handle_post_contact() {
         error_log("Failed to save contact submission - Name: $full_name, Email: $email");
         sendJsonResponse('error', 'Failed to submit contact form', null, 500);
     }
-    $contact_id = db_insert($query, $params);
-
-if (!$contact_id) {
-
-    error_log(
-        "MYSQL ERROR: " .
-        get_db_connection()->error
-    );
-
-}
 }
 
 /**

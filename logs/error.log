@@ -1035,3 +1035,24 @@ Stack trace:
 [2026-06-11 08:50:21] Comment: Processing for event - Photo Walk
 [2026-06-11 08:50:21] Comment: Creating comment for name=Promi, event_id=14
 [2026-06-11 08:50:21] Comment: Success - comment_id=8
+[2026-06-11 12:07:05] Registration attempt with data: {"event_id":14,"name":"Jane Smith","email":"jane.smith@example.com","phone":"01987654321","address":"456 Oak Avenue, Dhaka","institute":"BUET","gender":"Male","academic_year":"3rd","experience":"Advanced"}
+[2026-06-11 12:07:05] Registration: Processing event_id=14
+[2026-06-11 12:07:05] Registration: Event found - Photo Walk (registered: 2/20)
+[2026-06-11 12:07:05] Registration: Creating registration record - email=jane.smith@example.com
+[2026-06-11 12:07:05] Registration: Successfully registered with id=7
+[2026-06-11 12:09:09] Registration attempt with data: {"event_id":14,"name":"Sadat Hossain","email":"sadat@gmail.com","phone":"01973547635","address":"123 Ozure Avenue, Dhaka","institute":"KU","gender":"Male","academic_year":"3rd","experience":"Advanced"}
+[2026-06-11 12:09:09] Registration: Processing event_id=14
+[2026-06-11 12:09:09] Registration: Event found - Photo Walk (registered: 3/20)
+[2026-06-11 12:09:09] Registration: Creating registration record - email=sadat@gmail.com
+[2026-06-11 12:09:09] Registration: Successfully registered with id=8
+[2026-06-11 12:09:44] Comment attempt with data: {"event_id":14,"name":"Urmi","email":null,"comment":"Amazing"}
+[2026-06-11 12:09:44] Comment: Processing for event - Photo Walk
+[2026-06-11 12:09:44] Comment: Creating comment for name=Urmi, event_id=14
+[2026-06-11 12:09:44] Comment: Success - comment_id=10
+[11-Jun-2026 12:13:22 Europe/Berlin] Contact submission saved - ID: 8, Name: Nafisa Akter, Email: nafisa@gmail.com
+[11-Jun-2026 12:14:53 Europe/Berlin] Contact submission saved - ID: 9, Name: Nafisa Akter, Email: nafisa013@gmail.com
+[11-Jun-2026 10:20:49 UTC] PHP Warning:  Undefined variable $pdo in Command line code on line 1
+[11-Jun-2026 10:20:49 UTC] PHP Fatal error:  Uncaught Error: Call to a member function query() on null in Command line code:1
+Stack trace:
+#0 {main}
+  thrown in Command line code on line 1

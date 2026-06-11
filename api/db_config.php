@@ -255,7 +255,8 @@ function log_error($message) {
  */
 function respond($status, $message, $data = null) {
     header('Content-Type: application/json');
-    http_response_code($status === 'success' ? 200 : 400);
+    // Always return 200 - let JSON body indicate success/error
+    http_response_code(200);
     
     $response = [
         'status' => $status,
