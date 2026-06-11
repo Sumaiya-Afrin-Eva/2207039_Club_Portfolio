@@ -13,12 +13,18 @@ ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.cookie_httponly', '0');  // Allow JavaScript access if needed
 ini_set('session.cookie_lifetime', '0');  // Session cookie (expires when browser closes)
 
-// Set cache prevention headers for all auth endpoints
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+// Set AGGRESSIVE cache prevention headers for all auth endpoints - Chrome specific
+// These headers ensure Chrome NEVER caches the response
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private, proxy-revalidate');
 header('Cache-Control: post-check=0, pre-check=0', false);
 header('Pragma: no-cache');
 header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
 header('Content-Type: application/json');
+
+// Chrome-specific headers to prevent all forms of caching
+header('Vary: *');
+header('ETag: ""');
+header('X-Content-Type-Options: nosniff');
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
